@@ -1,0 +1,16 @@
+{
+  "name": {
+    "givenName": "Anony",
+    "familyName": "Mouse"
+  },
+  "id": "6e6017b0-4235-11e6-afb5-8d78a35b2f79",
+  "revision": "19-1467671096673",
+  "deleted": null,
+  "username": "test-anonymouse",
+  "email": "",
+  "gravatar": "1b60b5e2046a21aa456d9480ba0da8d1",
+  "description": "Friendly",
+  "language": "zh",
+  "createdAt": "2016-06-22T22:19:53.387Z",
+  "updatedAt": "2016-06-22T22:24:56.673Z"
+}
