@@ -1,0 +1,11 @@
+{
+  "name": "as-auth-provider",
+  "description": "Example auth provider for authenticated systems workshop",
+  "version": "0.0.1",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "components"
+  ],
+  "dependencies": {}
+}
