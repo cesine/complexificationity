@@ -41,8 +41,8 @@ function getList(req, res, next) {
   });
 }
 
-router.get('/', getList);
-router.get('/:username', getUser);
+router.get('/', /* oauth.authorize(), */ getList);
+router.get('/:username', /* oauth.authorize(), */ getUser);
 
 module.exports.getUser = getUser;
 module.exports.getList = getList;
