@@ -52,6 +52,8 @@ describe('/v1/users', function() {
         fixtures.user.createdAt = res.body.createdAt;
         fixtures.user.updatedAt = res.body.updatedAt;
         fixtures.user.revision = res.body.revision;
+        fixtures.user.salt = ''
+        fixtures.user.hash = ''
 
         expect(res.body).to.deep.equal(fixtures.user);
 

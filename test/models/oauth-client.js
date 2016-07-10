@@ -199,6 +199,7 @@ describe('oauth client model', function() {
     var user = {
       id: 'test-user-efg',
       username: 'test-user',
+      password: 'aje24wersdfgs324rfe+woe',
       name: {
         familyName: 'Test'
       }
@@ -302,7 +303,7 @@ describe('oauth client model', function() {
 
       describe('users', function() {
         it('should get a user', function(done) {
-          OAuthClient.getUser('test-user', 'bunnies', function(err, userId) {
+          OAuthClient.getUser('test-user', 'aje24wersdfgs324rfe+woe', function(err, userId) {
             if (err) {
               return done(err);
             }

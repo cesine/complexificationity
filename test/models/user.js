@@ -2,11 +2,11 @@
 
 var expect = require('chai').expect;
 
-var user = require('./../../models/user');
+var User = require('./../../models/user');
 
 describe('user model', function() {
   before(function() {
-    return user.init();
+    return User.init();
   });
 
   describe('serialization', function() {
@@ -16,7 +16,7 @@ describe('user model', function() {
         givenName: 'abc'
       };
 
-      var json = user.serialization.flatToJson(flat, '');
+      var json = User.serialization.flatToJson(flat, '');
 
       expect(json).to.deep.equal({
         name: {
@@ -29,6 +29,8 @@ describe('user model', function() {
         deleted_reason: '',
         description: '',
         email: '',
+        salt: '',
+        hash: '',
         gravatar: '',
         language: '',
         username: 'test-abc'
@@ -44,7 +46,7 @@ describe('user model', function() {
         extraneous: 'will be removed from flat'
       };
 
-      var flat = user.serialization.jsonToFlat(json, '');
+      var flat = User.serialization.jsonToFlat(json, '');
 
       expect(flat).to.deep.equal({
         givenName: 'abc',
@@ -54,6 +56,8 @@ describe('user model', function() {
         deleted_reason: '',
         description: '',
         email: '',
+        salt: '',
+        hash: '',
         gravatar: '',
         language: '',
         username: 'test-abc'
@@ -63,18 +67,19 @@ describe('user model', function() {
 
   describe('persistance', function() {
     before(function() {
-      return user.init();
+      return User.init();
     });
 
     it('should create a user', function(done) {
       var json = {
         username: 'test-' + Date.now(),
+        password: '7hfD!hujoijK',
         name: {
           familyName: 'Test'
         }
       };
 
-      user.create(json, function(err, profile) {
+      User.create(json, function(err, profile) {
         if (err) {
           return done(err);
         }
@@ -90,7 +95,42 @@ describe('user model', function() {
         expect(profile.createdAt).to.be.defined;
         expect(profile.updatedAt).to.be.defined;
         expect(profile.revision).to.be.defined;
+        expect(profile.salt).length(29);
+        expect(profile.hash).length(60);
         expect(profile.deletedAt).to.be.null;
+
+        done();
+      });
+    });
+
+    it('should require a name', function(done) {
+      var json = {
+        username: 'test-deficient' + Date.now()
+      };
+
+      User.create(json, function(err, profile) {
+        expect(err.message).equal('Invalid user: please provide a name section');
+
+        done();
+      });
+    });
+
+    it('should ignore invalid revisions', function(done) {
+      var json = {
+        username: 'test-deficient' + Date.now(),
+        name: {},
+        revision: 'notanexpectedtrevision'
+      };
+
+      User.create(json, function(err, profile) {
+        if (err) {
+          return done(err);
+        }
+
+        expect(profile.id).length(36);
+
+        expect(profile.revision).to.be.defined;
+        expect(profile.revision).not.equal('notanexpectedtrevision');
 
         done();
       });
@@ -114,9 +154,8 @@ describe('user model', function() {
         updatedAt: new Date() - 14 * 1000 * 1000
       };
 
-      user.create(json, function(err, profile) {
+      User.create(json, function(err, profile) {
         if (err) {
-          console.log(err.stack);
           return done(err);
         }
 
@@ -143,6 +182,8 @@ describe('user model', function() {
             familyName: 'Test'
           },
           language: 'ko',
+          salt: '',
+          hash: '',
           // dates will be the db dates
           createdAt: profile.createdAt,
           updatedAt: profile.updatedAt
@@ -154,11 +195,11 @@ describe('user model', function() {
 
     it('should save a new user', function(done) {
       var json = {
-        username: 'test-abc',
+        username: 'test-abc' + Date.now(),
         name: {}
       };
 
-      user.save(json, function(err, profile) {
+      User.save(json, function(err, profile) {
         if (err) {
           return done(err);
         }
@@ -176,63 +217,62 @@ describe('user model', function() {
     });
 
     it('should return null if user not found', function(done) {
-      user
-        .read('test-nonexistant-user', function(err, profile) {
-          if (err) {
-            return done(err);
-          }
+      User.read('test-nonexistant-user', function(err, profile) {
+        if (err) {
+          return done(err);
+        }
 
-          expect(profile).to.be.null;
+        expect(profile).to.be.null;
 
-          done();
-        });
+        done();
+      });
     });
 
     describe('existing users', function() {
       beforeEach(function(done) {
-        user
-          .save({
-            username: 'test-efg',
+        User.save({
+          username: 'test-efg',
+          name: {
+            givenName: 'Anony',
+            familyName: 'Mouse'
+          },
+          description: 'Friendly',
+          language: 'zh'
+        }, function() {
+          done();
+        });
+      });
+
+      it('should read an existing user', function(done) {
+        User.read({
+          username: 'test-efg'
+        }, function(err, profile) {
+          if (err) {
+            return done(err);
+          }
+
+          expect(profile).to.deep.equal({
             name: {
               givenName: 'Anony',
               familyName: 'Mouse'
             },
+            id: profile.id,
+            revision: profile.revision,
+            deletedAt: null,
+            deleted_reason: '',
+            username: 'test-efg',
             description: 'Friendly',
-            language: 'zh'
-          }, function() {
-            done();
+            email: '',
+            salt: '',
+            hash: '',
+            gravatar: profile.gravatar,
+            language: 'zh',
+            createdAt: profile.createdAt,
+            updatedAt: profile.updatedAt
           });
-      });
 
-      it('should read an existing user', function(done) {
-        user
-          .read({
-            username: 'test-efg'
-          }, function(err, profile) {
-            if (err) {
-              return done(err);
-            }
-
-            expect(profile).to.deep.equal({
-              name: {
-                givenName: 'Anony',
-                familyName: 'Mouse'
-              },
-              id: profile.id,
-              revision: profile.revision,
-              deletedAt: null,
-              deleted_reason: '',
-              username: 'test-efg',
-              description: 'Friendly',
-              email: '',
-              gravatar: profile.gravatar,
-              language: 'zh',
-              createdAt: profile.createdAt,
-              updatedAt: profile.updatedAt
-            });
-
-            done();
-          });
+          done();
+        });
       });
 
       it('should update a user', function(done) {
@@ -244,67 +284,194 @@ describe('user model', function() {
           },
           language: 'ko'
         };
-        user
-          .save(json, function(err, profile) {
+        User.save(json, function(err, profile) {
+          if (err) {
+            return done(err);
+          }
+
+          var revisionNumber = parseInt(profile.revision.split('-')[0], 10);
+          expect(typeof revisionNumber).to.equal('number');
+
+          expect(profile).to.deep.equal({
+            name: {
+              givenName: 'Albert',
+              // should overwrite values if patch is specified
+              familyName: ''
+            },
+            id: profile.id,
+            revision: profile.revision,
+            deletedAt: null,
+            deleted_reason: '',
+            username: 'test-efg',
+            // should not overwrite previous values if patch is missing
+            description: 'Friendly',
+            email: '',
+            salt: '',
+            hash: '',
+            gravatar: profile.gravatar,
+            language: 'ko',
+            createdAt: profile.createdAt,
+            updatedAt: profile.updatedAt
+          });
+
+          done();
+        });
+      });
+
+      describe('deletion', function() {
+        var userToDelete = {
+          username: 'test-delete' + Date.now(),
+          name: {}
+        };
+
+        before(function(done) {
+          User.create(userToDelete, function(err, profile) {
+            done();
+          });
+        });
+
+        it('should require a user', function(done) {
+          User.flagAsDeleted(null, function(err) {
+            expect(err.message).equal('Please provide a username and a deleted_reason')
+
+            done();
+          });
+        });
+
+        it('should require a username', function(done) {
+          User.flagAsDeleted({}, function(err) {
+            expect(err.message).equal('Please provide a username and a deleted_reason')
+
+            done();
+          });
+        });
+
+        it('should require a reason', function(done) {
+          User.flagAsDeleted({
+            username: 'test-deleted' + Date.now()
+          }, function(err) {
+            expect(err.message).equal('Please provide a username and a deleted_reason')
+
+            done();
+          });
+        });
+
+        it('should warn if the user doesnt exist', function(done) {
+          User.flagAsDeleted({
+            username: 'test-deleted' + Date.now(),
+            deleted_reason: 'for testing purposes'
+          }, function(err, user) {
+            expect(err.message).equal('Cannot delete user which doesn\'t exist')
+
+            done();
+          });
+        });
+
+        it('should flag user as deleted', function(done) {
+          User.flagAsDeleted({
+            username: userToDelete.username,
+            deleted_reason: 'for testing purposes'
+          }, function(err, user) {
             if (err) {
               return done(err);
             }
 
-            var revisionNumber = parseInt(profile.revision.split('-')[0], 10);
-            expect(typeof revisionNumber).to.equal('number');
-
-            expect(profile).to.deep.equal({
-              name: {
-                givenName: 'Albert',
-                // should overwrite values if patch is specified
-                familyName: ''
-              },
-              id: profile.id,
-              revision: profile.revision,
-              deletedAt: null,
-              deleted_reason: '',
-              username: 'test-efg',
-              // should not overwrite previous values if patch is missing
-              description: 'Friendly',
-              email: '',
-              gravatar: profile.gravatar,
-              language: 'ko',
-              createdAt: profile.createdAt,
-              updatedAt: profile.updatedAt
-            });
+            expect(user.deleted_reason).equal('for testing purposes');
+            expect(user.deletedAt.toDateString()).equal(new Date().toDateString());
 
             done();
           });
+        });
+      });
+    });
+  });
+
+  describe('password', function() {
+    var userWithPassword = {
+      username: 'test-password',
+      name: {
+        givenName: 'Test',
+        familyName: 'Password'
+      },
+      password: 'zKmmfweLj2!h'
+    };
+
+    before(function(done) {
+      User.init();
+      User.create(userWithPassword, function(err, profile) {
+        done();
+      });
+    });
+
+    it('should reply with invalid username and password', function() {
+      var hashed = User.hashPassword('123ioiw3we_!');
+
+      expect(hashed.hash).length(60);
+      expect(hashed.salt).length(29);
+    });
+
+    it('should reply with invalid username and password', function(done) {
+      User.verifyPassword({
+        username: 'test-nonexistant-user',
+        password: '123ioiw3we_!'
+      }, function(err) {
+        expect(err.message).equal('User not found');
+
+        done();
+      });
+    });
+
+    it('should reply with invalid username and password', function(done) {
+      User.verifyPassword({
+        username: userWithPassword.username,
+        password: 'anotherpassword'
+      }, function(err) {
+        expect(err.message).equal('Invalid password');
+
+        done();
+      });
+    });
+
+    it('should recognize the password', function(done) {
+      User.verifyPassword({
+        username: userWithPassword.username,
+        password: 'zKmmfweLj2!h'
+      }, function(err, profile) {
+        if (err) {
+          return done(err);
+        }
+
+        expect(profile.username).equal(userWithPassword.username);
+
+        done();
       });
     });
   });
 
   describe('collection', function() {
     beforeEach(function(done) {
-      user
-        .save({
-          username: 'yoan oct',
+      User.save({
+        username: 'yoan oct',
+        name: {},
+      }, function() {
+        User.save({
+          username: 'alex oct',
           name: {},
+          email: ''
         }, function() {
-          user
-            .save({
-              username: 'alex oct',
-              name: {},
-              email: ''
-            }, function() {
-              user
-                .save({
-                  username: 'noemi oct',
-                  name: {},
-                  email: 'noemi@example.com'
-                }, function() {
-                  done();
-                });
-            });
+          User.save({
+            username: 'noemi oct',
+            name: {},
+            email: 'noemi@example.com'
+          }, function() {
+            done();
+          });
         });
+      });
     });
+
     it('should list a public view of all users', function(done) {
-      user.list({
+      User.list({
         where: {
           username: {
             $like: '%oct'
@@ -318,6 +485,26 @@ describe('user model', function() {
 
         expect(users).not.to.deep.equal([]);
         expect(users).length(3);
+
+        done();
+      });
+    });
+
+    it('should return empty lists', function(done) {
+      User.list({
+        where: {
+          username: {
+            $like: '%unlikely'
+          }
+        },
+        limit: 1000
+      }, function(err, users) {
+        if (err) {
+          return done(err);
+        }
+
+        expect(users).to.deep.equal([]);
+        expect(users).length(0);
 
         done();
       });

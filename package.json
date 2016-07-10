@@ -12,6 +12,7 @@
   },
   "main": "service",
   "dependencies": {
+    "bcrypt": "^0.8.7",
     "body-parser": "^1.14.2",
     "cors": "^2.7.1",
     "debug": "^2.2.0",

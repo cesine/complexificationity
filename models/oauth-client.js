@@ -204,15 +204,15 @@ var getUser = function(username, password, callback) {
   User.verifyPassword({
     username: username,
     password: password
-  }, function(err, user) {
+  }, function(err, profile) {
     if (err) {
       return callback(err);
     }
-    if (!user) {
+    if (!profile) {
       return callback(null);
     }
 
-    callback(null, user.id);
+    callback(null, profile.id);
   });
 };
 

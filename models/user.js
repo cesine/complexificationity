@@ -1,4 +1,5 @@
 'use strict';
+var bcrypt = require('bcrypt');
 var crypto = require('crypto');
 var debug = require('debug')('user');
 var Sequelize = require('sequelize');
@@ -25,7 +26,7 @@ var FLAT_SCHEMA = {
     primaryKey: true
   },
   revision: Sequelize.STRING,
-  deletedAt: Sequelize.STRING,
+  deletedAt: Sequelize.DATE,
   deleted_reason: Sequelize.STRING,
   username: {
     type: Sequelize.STRING,
@@ -46,7 +47,9 @@ var FLAT_SCHEMA = {
   description: Sequelize.TEXT,
   givenName: Sequelize.STRING,
   familyName: Sequelize.STRING,
-  language: Sequelize.STRING
+  language: Sequelize.STRING,
+  salt: Sequelize.STRING,
+  hash: Sequelize.STRING
 };
 
 var User = sequelize.define('users', FLAT_SCHEMA);
@@ -82,6 +85,10 @@ function jsonToFlat(json, defaultValue) {
 
   if (!flat.deletedAt) {
     flat.deletedAt = null;
+  }
+
+  if (flat.password) {
+
   }
 
   return flat;
@@ -139,8 +146,11 @@ function increaseRevision(revision) {
  */
 function create(profile, callback) {
   if (!profile || !profile.name) {
-    return callback(new Error('Invalid user'));
+    return callback(new Error('Invalid user: please provide a name section'));
   }
+
+  delete profile.hash;
+  delete profile.salt;
 
   var flat = jsonToFlat(profile);
 
@@ -152,6 +162,16 @@ function create(profile, callback) {
     }
   }
   flat.revision = flat.revision || '1-' + Date.now();
+
+  if (profile.password) {
+    var hashed = hashPassword(profile.password);
+    if (hashed instanceof Error) {
+      return callback(hashed);
+    }
+
+    flat.hash = hashed.hash;
+    flat.salt = hashed.salt;
+  }
 
   User
     .create(flat)
@@ -188,7 +208,63 @@ function read(profile, callback) {
  * @param  {User}   profile
  * @return {Promise}
  */
+function hashPassword(password) {
+  if (!password) {
+    return new Error('Please provide a password');
+  }
+
+  var salt = bcrypt.genSaltSync(10);
+  return {
+    salt: salt,
+    hash: bcrypt.hashSync(password, salt)
+  };
+}
+
+/**
+ * Verify a user in the database
+ * @param  {User}   profile
+ * @return {Promise}
+ */
 function verifyPassword(profile, callback) {
+  if (!profile || !profile.username || !profile.password) {
+    return callback(new Error('Please provide a username and a password'));
+  }
+
+  User
+    .find({
+      where: {
+        username: profile.username
+      },
+      // attributes: ['hash']
+    })
+    .then(function(dbUser) {
+      if (!dbUser) {
+        return callback(new Error('User not found'));
+      }
+
+      if (!dbUser.dataValues.hash) {
+        return callback(new Error('User doesn\'t have a password'));
+      }
+
+      if (bcrypt.compareSync(profile.password, dbUser.dataValues.hash)) {
+        return callback(null, flatToJson(dbUser.toJSON(), ''));
+      }
+
+      callback(new Error('Invalid password'));
+    })
+    .catch(callback);
+}
+
+/**
+ * Verify a user in the database
+ * @param  {User}   profile
+ * @return {Promise}
+ */
+function changePassword(profile, callback) {
+  if (!profile || !profile.username || !profile.newPassword || !profile.password) {
+    return callback(new Error('Please provide a username, password and newPassword'));
+  }
+
   User
     .find({
       where: {
@@ -196,12 +272,26 @@ function verifyPassword(profile, callback) {
       }
     })
     .then(function(dbUser) {
-      if (!dbUser) {
-        return callback(null, null);
+      if (!dbUser.dataValues.hash) {
+        return callback(new Error('Please set the password before changing it'));
       }
-      // TODO salt and hash the password and check if it matches
 
-      callback(null, flatToJson(dbUser.toJSON(), ''));
+      var hash = hashPassword(profile.password);
+
+      if (bcrypt.compareSync(profile.password, dbUser.dataValues.hash)) {
+        return callback(new Error('Password doesn\'t match your old password'));
+      }
+
+      var hashed = hashPassword(profile.newPassword);
+      if (hashed instanceof Error) {
+        return callback(hashed);
+      }
+
+      dbUser.dataValues.hash = hashed.hash;
+      dbUser.salt = hashed.salt;
+      dbUser.save().then(function(dbUser) {
+        callback(null, flatToJson(dbUser.toJSON(), ''));
+      }).catch(callback);
     })
     .catch(callback);
 }
@@ -212,6 +302,11 @@ function verifyPassword(profile, callback) {
  * @return {Promise}
  */
 function save(profile, callback) {
+  if (!profile) {
+    return callback(new Error('Please provide a user'));
+  }
+
+
   User
     .find({
       where: {
@@ -224,6 +319,9 @@ function save(profile, callback) {
         return create(profile, callback);
       }
 
+      delete profile.hash;
+      delete profile.salt;
+
       var flat = jsonToFlat(profile, 'not:::patched');
       debug(flat);
 
@@ -233,6 +331,19 @@ function save(profile, callback) {
           dbUser.set(attr, flat[attr]);
           debug('setting ', attr);
         }
+      }
+
+      // If the user doesnt have a has yet
+      // and the passed in profile had a password,
+      // set the hash
+      if (profile.password && !dbUser.dataValues.hash) {
+        var hashed = hashPassword(profile.password);
+        if (hashed instanceof Error) {
+          return callback(hashed);
+        }
+
+        dbUser.hash = hashed.hash;
+        dbUser.salt = hashed.salt;
       }
 
       dbUser.set('revision', increaseRevision(dbUser.get('revision')));
@@ -286,8 +397,36 @@ function list(options, callback) {
  * @param  {String} options [description]
  * @return {Promise}        [description]
  */
-function flagAsDeleted() {
-  throw new Error('Unimplemented');
+function flagAsDeleted(profile, callback) {
+  if (!profile || !profile.username || !profile.deleted_reason) {
+    return callback(new Error('Please provide a username and a deleted_reason'));
+  }
+
+  User
+    .find({
+      where: {
+        username: profile.username
+      }
+    })
+    .then(function(dbUser) {
+      if (!dbUser) {
+        return callback(new Error('Cannot delete user which doesn\'t exist'));
+      }
+
+      dbUser.deletedAt = new Date();
+      dbUser.deleted_reason = profile.deleted_reason;
+
+      dbUser
+        .save(dbUser)
+        .then(function(dbUser) {
+          if (!dbUser) {
+            return callback(new Error('Save failed'));
+          }
+
+          callback(null, dbUser.toJSON());
+        })
+        .catch(callback);
+    });
 }
 
 /**
@@ -304,6 +443,8 @@ module.exports.init = init;
 module.exports.list = list;
 module.exports.save = save;
 module.exports.read = read;
+module.exports.hashPassword = hashPassword;
+module.exports.changePassword = changePassword;
 module.exports.verifyPassword = verifyPassword;
 module.exports.serialization = {
   flatToJson: flatToJson,
