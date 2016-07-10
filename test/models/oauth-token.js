@@ -5,13 +5,9 @@ var expect = require('chai').expect;
 var OauthToken = require('./../../models/oauth-token');
 
 describe('oauth token model', function() {
-  before(function() {
-    return OauthToken.init();
-  });
-
   describe('persistance', function() {
     before(function() {
-      return OauthToken.init();
+      OauthToken.init();
     });
 
     it('should create a OauthToken', function(done) {
@@ -62,7 +58,7 @@ describe('oauth token model', function() {
     });
 
     describe('existing OauthTokens', function() {
-      beforeEach(function(done) {
+      before(function(done) {
         OauthToken
           .create({
             access_token: 'test-token',
@@ -70,7 +66,7 @@ describe('oauth token model', function() {
             refresh_token: 'test-refresh',
             refresh_token_expires_on: new Date(1468108856432),
             client_id: 'test-client',
-            user_id: 'test-user'
+            user_id: 'test-user-efg_random_uuid'
           }, function() {
             done();
           });
@@ -88,7 +84,7 @@ describe('oauth token model', function() {
             expect(token.access_token).equal('test-token');
             expect(token.refresh_token).equal('test-refresh');
             expect(token.client_id).equal('test-client');
-            expect(token.user_id).equal('test-user');
+            expect(token.user_id).equal('test-user-efg_random_uuid');
 
             expect(token.access_token_expires_on instanceof Date).true;
             expect(token.refresh_token_expires_on instanceof Date).true;

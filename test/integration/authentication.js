@@ -7,6 +7,18 @@ var User = require('./../../models/user');
 var service = require('./../../');
 
 describe('/authenticate', function() {
+  before(function(done) {
+    User.init();
+
+    User.create({
+      id: 'test-user-efg_random_uuid',
+      username: 'test-user',
+      password: 'aje24wersdfgs324rfe+woe'
+    }, function(err) {
+      done();
+    });
+  });
+
   describe('GET /authenticate/login', function() {
     it('should display', function(done) {
       supertest(service)
@@ -183,17 +195,6 @@ describe('/authenticate', function() {
   });
 
   describe('POST /authenticate/register', function() {
-    before(function(done) {
-      User.init();
-
-      User.create({
-        username: 'test-user',
-        password: 'aje24wersdfgs324rfe+woe'
-      }, function(err) {
-        done();
-      });
-    });
-
     it('should require a body', function(done) {
       supertest(service)
         .post('/authenticate/register')
