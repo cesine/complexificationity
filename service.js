@@ -6,6 +6,7 @@ var debug = require('debug')('service');
 var express = require('express');
 var logger = require('morgan');
 
+var authenticationRoutes = require('./routes/authentication').router;
 var errorsMiddleware = require('./middleware/error');
 var routes = require('./routes/index').router;
 var userRoutes = require('./routes/user').router;
@@ -41,6 +42,7 @@ service.use(cors());
 /**
  * Routes
  */
+service.use('/authenticate', authenticationRoutes);
 service.use('/v1/users', userRoutes);
 service.use('/', routes);
 

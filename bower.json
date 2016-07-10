@@ -7,5 +7,7 @@
     "node_modules",
     "components"
   ],
-  "dependencies": {}
+  "dependencies": {
+    "as-ui-auth": "https://github.com/cesine/as-ui-auth.git"
+  }
 }
