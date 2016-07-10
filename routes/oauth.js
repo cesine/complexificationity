@@ -65,7 +65,7 @@ router.get('/authorize', getAuthorize);
 router.post('/authorize', postAuthorize);
 
 router.get('/token', getToken);
-router.post('/token', postToken;
+router.post('/token', postToken);
 
 module.exports.getAuthorize = getAuthorize;
 module.exports.getToken = getToken;

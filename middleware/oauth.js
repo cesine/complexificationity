@@ -1,11 +1,11 @@
 'use strict';
 
 var OAuthServer = require('express-oauth-server');
-var ApiClient  = require('./../models/api-client').ApiClient;
+var OAuthClient  = require('./../models/oauth-client');
 
 var oauth = new OAuthServer({
   debug: true,
-  model: ApiClient, // See https://github.com/thomseddon/node-oauth2-server for specification
+  model: OAuthClient, // See https://github.com/thomseddon/node-oauth2-server for specification
 });
 
 console.log('oauth', oauth);
