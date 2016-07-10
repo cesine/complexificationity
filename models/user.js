@@ -10,7 +10,7 @@ var sequelize = new Sequelize('database', 'username', 'password', {
     min: 0,
     idle: 10000
   },
-  storage: 'users.sqlite'
+  storage: 'db/users.sqlite'
 });
 
 var DEFAULT_GRAVATAR = '9a85e3d0-4233-11e6-bac0-4b263459491d';
@@ -25,7 +25,8 @@ var FLAT_SCHEMA = {
     primaryKey: true
   },
   revision: Sequelize.STRING,
-  deleted: Sequelize.STRING,
+  deletedAt: Sequelize.STRING,
+  deleted_reason: Sequelize.STRING,
   username: {
     type: Sequelize.STRING,
     unique: true
@@ -79,8 +80,8 @@ function jsonToFlat(json, defaultValue) {
     delete flat.id;
   }
 
-  if (!flat.deleted) {
-    flat.deleted = null;
+  if (!flat.deletedAt) {
+    flat.deletedAt = null;
   }
 
   return flat;
@@ -111,8 +112,8 @@ function flatToJson(flat, defaultValue) {
     }
   }
 
-  if (!json.deleted) {
-    json.deleted = null;
+  if (!json.deletedAt) {
+    json.deletedAt = null;
   }
 
   if (flat.createdAt) {
@@ -261,7 +262,7 @@ function list(options, callback) {
   options.limit = options.limit || 10;
   options.offset = options.offset || 0;
   options.where = options.where || {
-    deleted: null
+    deletedAt: null
   };
 
   options.attributes = ['id', 'username', 'gravatar'];

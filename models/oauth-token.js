@@ -22,7 +22,7 @@ var oauthToken = sequelize.define('oauth_tokens', {
   access_token: Sequelize.TEXT,
   access_token_expires_on: Sequelize.DATE,
   client_id: Sequelize.TEXT,
-  deleted: Sequelize.DATE,
+  deletedAt: Sequelize.DATE,
   deleted_reason: Sequelize.TEXT,
   refresh_token: Sequelize.TEXT,
   refresh_token_expires_on: Sequelize.DATE,
@@ -99,7 +99,7 @@ function list(options, callback) {
   options.limit = options.limit || 10;
   options.offset = options.offset || 0;
   options.where = options.where || {
-    deleted: null
+    deletedAt: null
   };
 
   options.attributes = ['access_token', 'client_id', 'user_id', 'deleted_reason'];

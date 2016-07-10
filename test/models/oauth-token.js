@@ -177,7 +177,7 @@ describe('oauth token model', function() {
         });
     });
 
-    it('should list a public view of all OauthTokens', function(done) {
+    it('should list an admin view of all tokens', function(done) {
       OauthToken.list({
         where: {
           access_token: {

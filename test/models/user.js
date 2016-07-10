@@ -25,7 +25,8 @@ describe('user model', function() {
         },
         id: '',
         revision: '',
-        deleted: null,
+        deletedAt: null,
+        deleted_reason: '',
         description: '',
         email: '',
         gravatar: '',
@@ -49,7 +50,8 @@ describe('user model', function() {
         givenName: 'abc',
         familyName: '',
         revision: '',
-        deleted: null,
+        deletedAt: null,
+        deleted_reason: '',
         description: '',
         email: '',
         gravatar: '',
@@ -88,7 +90,7 @@ describe('user model', function() {
         expect(profile.createdAt).to.be.defined;
         expect(profile.updatedAt).to.be.defined;
         expect(profile.revision).to.be.defined;
-        expect(profile.deleted).to.be.null;
+        expect(profile.deletedAt).to.be.null;
 
         done();
       });
@@ -128,7 +130,8 @@ describe('user model', function() {
         expect(profile).to.deep.equal({
           id: json.id,
           revision: profile.revision,
-          deleted: null,
+          deletedAt: null,
+          deleted_reason: '',
           username: json.username,
           // content wont be sanitized
           description: '<script src=\"http://haha.com/cleanme\"></script>',
@@ -166,7 +169,7 @@ describe('user model', function() {
         expect(profile.createdAt).to.be.defined;
         expect(profile.updatedAt).to.be.defined;
         expect(profile.revision).to.be.defined;
-        expect(profile.deleted).to.be.null;
+        expect(profile.deletedAt).to.be.null;
 
         done();
       });
@@ -217,7 +220,8 @@ describe('user model', function() {
               },
               id: profile.id,
               revision: profile.revision,
-              deleted: null,
+              deletedAt: null,
+              deleted_reason: '',
               username: 'test-efg',
               description: 'Friendly',
               email: '',
@@ -257,7 +261,8 @@ describe('user model', function() {
               },
               id: profile.id,
               revision: profile.revision,
-              deleted: null,
+              deletedAt: null,
+              deleted_reason: '',
               username: 'test-efg',
               // should not overwrite previous values if patch is missing
               description: 'Friendly',
