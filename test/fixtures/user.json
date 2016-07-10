@@ -9,10 +9,10 @@
   "deleted_reason": "",
   "username": "test-anonymouse",
   "email": "",
+  "password": "phonemes",
   "gravatar": "1b60b5e2046a21aa456d9480ba0da8d1",
   "description": "Friendly",
   "language": "zh",
-  "salt": "",
   "hash": "",
   "createdAt": "2016-06-22T22:19:53.387Z",
   "updatedAt": "2016-06-22T22:24:56.673Z"

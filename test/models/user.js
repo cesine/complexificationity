@@ -29,7 +29,6 @@ describe('user model', function() {
         deleted_reason: '',
         description: '',
         email: '',
-        salt: '',
         hash: '',
         gravatar: '',
         language: '',
@@ -56,7 +55,6 @@ describe('user model', function() {
         deleted_reason: '',
         description: '',
         email: '',
-        salt: '',
         hash: '',
         gravatar: '',
         language: '',
@@ -95,7 +93,6 @@ describe('user model', function() {
         expect(profile.createdAt).to.be.defined;
         expect(profile.updatedAt).to.be.defined;
         expect(profile.revision).to.be.defined;
-        expect(profile.salt).length(29);
         expect(profile.hash).length(60);
         expect(profile.deletedAt).to.be.null;
 
@@ -184,7 +181,6 @@ describe('user model', function() {
             familyName: 'Test'
           },
           language: 'ko',
-          salt: profile.salt,
           hash: profile.hash,
           // dates will be the db dates
           createdAt: profile.createdAt,
@@ -235,6 +231,7 @@ describe('user model', function() {
       beforeEach(function(done) {
         User.save({
           username: 'test-efg',
+          password: 'a390j3qawoeszidj',
           name: {
             givenName: 'Anony',
             familyName: 'Mouse'
@@ -266,8 +263,7 @@ describe('user model', function() {
             username: 'test-efg',
             description: 'Friendly',
             email: '',
-            salt: '',
-            hash: '',
+            hash: profile.hash,
             gravatar: profile.gravatar,
             language: 'zh',
             createdAt: profile.createdAt,
@@ -281,6 +277,7 @@ describe('user model', function() {
       it('should update a user', function(done) {
         var json = {
           username: 'test-efg',
+          password: 'a390j3qawoeszidj',
           name: {
             givenName: 'Albert',
             familyName: ''
@@ -309,8 +306,7 @@ describe('user model', function() {
             // should not overwrite previous values if patch is missing
             description: 'Friendly',
             email: '',
-            salt: '',
-            hash: '',
+            hash: profile.hash,
             gravatar: profile.gravatar,
             language: 'ko',
             createdAt: profile.createdAt,
@@ -456,15 +452,18 @@ describe('user model', function() {
     beforeEach(function(done) {
       User.save({
         username: 'yoan oct',
+        password: 'zKmmfweLj2!h',
         name: {},
       }, function() {
         User.save({
           username: 'alex oct',
+          password: 'zKmmfweLj2!h',
           name: {},
           email: ''
         }, function() {
           User.save({
             username: 'noemi oct',
+            password: 'zKmmfweLj2!h',
             name: {},
             email: 'noemi@example.com'
           }, function() {

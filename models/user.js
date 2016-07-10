@@ -48,7 +48,6 @@ var FLAT_SCHEMA = {
   givenName: Sequelize.STRING,
   familyName: Sequelize.STRING,
   language: Sequelize.STRING,
-  salt: Sequelize.STRING,
   hash: Sequelize.STRING
 };
 
@@ -154,7 +153,6 @@ function create(profile, callback) {
   }
 
   delete profile.hash;
-  delete profile.salt;
 
   var flat = jsonToFlat(profile);
 
@@ -174,7 +172,6 @@ function create(profile, callback) {
     }
 
     flat.hash = hashed.hash;
-    flat.salt = hashed.salt;
   }
 
   User
@@ -292,7 +289,6 @@ function changePassword(profile, callback) {
       }
 
       dbUser.dataValues.hash = hashed.hash;
-      dbUser.salt = hashed.salt;
       dbUser.save().then(function(dbUser) {
         callback(null, flatToJson(dbUser.toJSON(), ''));
       }).catch(callback);
@@ -324,7 +320,6 @@ function save(profile, callback) {
       }
 
       delete profile.hash;
-      delete profile.salt;
 
       var flat = jsonToFlat(profile, 'not:::patched');
       debug(flat);
@@ -347,7 +342,6 @@ function save(profile, callback) {
         }
 
         dbUser.hash = hashed.hash;
-        dbUser.salt = hashed.salt;
       }
 
       dbUser.set('revision', increaseRevision(dbUser.get('revision')));
