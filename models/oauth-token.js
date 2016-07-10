@@ -37,19 +37,12 @@ var oauthToken = sequelize.define('oauth_tokens', {
  * @return {Promise}
  */
 function create(options, callback) {
-  if (!options || !options.token || !options.client || !options.user) {
+  if (!options) {
     return callback(new Error('Invalid Options'));
   }
 
   oauthToken
-    .create({
-      access_token: options.token.accessToken,
-      access_token_expires_on: options.token.accessTokenExpiresOn,
-      client_id: options.client.id,
-      refresh_token: options.token.refreshToken,
-      refresh_token_expires_on: options.token.refreshTokenExpiresOn,
-      user_id: options.user.id
-    })
+    .create(options)
     .then(function(dbToken) {
       callback(null, dbToken.toJSON());
     })

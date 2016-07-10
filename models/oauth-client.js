@@ -221,10 +221,17 @@ var getUser = function(username, password, callback) {
  */
 
 var saveAccessToken = function(token, client, user, callback) {
+  if (!token || !client || !user) {
+    return callback(new Error('Invalid Options'));
+  }
+
   OAuthToken.create({
-    client: client,
-    token: token,
-    user: user
+    access_token: token.accessToken,
+    access_token_expires_on: token.accessTokenExpiresOn,
+    client_id: client.id,
+    refresh_token: token.refreshToken,
+    refresh_token_expires_on: token.refreshTokenExpiresOn,
+    user_id: user.id
   }, function(err, token) {
     if (err) {
       return callback(err);

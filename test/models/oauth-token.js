@@ -16,18 +16,12 @@ describe('oauth token model', function() {
 
     it('should create a OauthToken', function(done) {
       var json = {
-        token: {
-          accessToken: 'test-' + Date.now(),
-          accessTokenExpiresOn: new Date(Date.now() + 1 * 60 * 60 * 1000),
-          refreshToken: '23waejsowj4wejsrd',
-          refreshTokenExpiresOn: new Date(Date.now() + 1 * 60 * 60 * 1000),
-        },
-        client: {
-          id: 'acme123'
-        },
-        user: {
-          id: 'abc21234efg'
-        }
+        access_token: 'test-' + Date.now(),
+        access_token_expires_on: new Date(Date.now() + 1 * 60 * 60 * 1000),
+        refresh_token: '23waejsowj4wejsrd',
+        refresh_token_expires_on: new Date(Date.now() + 1 * 60 * 60 * 1000),
+        client_id: 'acme123',
+        user_id: 'abc21234efg'
       };
 
       OauthToken.create(json, function(err, token) {
@@ -38,12 +32,12 @@ describe('oauth token model', function() {
         expect(token.id).length(36);
         expect(token).to.deep.equal({
           id: token.id,
-          access_token: json.token.accessToken,
-          access_token_expires_on: json.token.accessTokenExpiresOn,
-          client_id: json.client.id,
-          refresh_token: json.token.refreshToken,
-          refresh_token_expires_on: json.token.refreshTokenExpiresOn,
-          user_id: json.user.id,
+          access_token: json.access_token,
+          access_token_expires_on: json.access_token_expires_on,
+          client_id: json.client_id,
+          refresh_token: json.refresh_token,
+          refresh_token_expires_on: json.refresh_token_expires_on,
+          user_id: json.user_id,
           updatedAt: token.updatedAt,
           createdAt: token.createdAt
         });
@@ -71,18 +65,12 @@ describe('oauth token model', function() {
       beforeEach(function(done) {
         OauthToken
           .create({
-            token: {
-              accessToken: 'test-token',
-              accessTokenExpiresOn: new Date(1468108856432),
-              refreshToken: 'test-refresh',
-              refreshTokenExpiresOn: new Date(1468108856432),
-            },
-            client: {
-              id: 'test-client'
-            },
-            user: {
-              id: 'test-user'
-            }
+            access_token: 'test-token',
+            access_token_expires_on: new Date(1468108856432),
+            refresh_token: 'test-refresh',
+            refresh_token_expires_on: new Date(1468108856432),
+            client_id: 'test-client',
+            user_id: 'test-user'
           }, function() {
             done();
           });
@@ -148,27 +136,21 @@ describe('oauth token model', function() {
           }
           OauthToken
             .create({
-              token: {
-                accessToken: 'testm-abc'
-              },
-              client: client,
-              user: user
+              access_token: 'testm-abc',
+              client_id: 'test-client',
+              user_id: 'test-user'
             }, function() {
               OauthToken
                 .create({
-                  token: {
-                    accessToken: 'testm-efg'
-                  },
-                  client: client,
-                  user: user
+                  access_token: 'testm-efg',
+                  client_id: 'test-client',
+                  user_id: 'test-user'
                 }, function() {
                   OauthToken
                     .create({
-                      token: {
-                        accessToken: 'testm-hij'
-                      },
-                      client: client,
-                      user: user
+                      access_token: 'testm-hij',
+                      client_id: 'test-client',
+                      user_id: 'test-user'
                     }, function() {
                       done();
                     });
