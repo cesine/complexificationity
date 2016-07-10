@@ -2,9 +2,11 @@
 
 var express = require('express');
 var path = require('path');
-var router = express.Router();
+var util = require('util');
 
 var User = require('./../models/user');
+
+var router = express.Router();
 
 /**
  * Render UI pages
@@ -24,11 +26,11 @@ function postLogin(req, res, next) {
   }, function(err, user) {
     if (err) {
       err.status = 403;
-      // return getLogin(req, res, next);
+      // send client side json which can be displayed to the user
       return next(err, req, res, next);
     }
     // Successful logins should send the user back to /oauth/authorize.
-    var path = req.body.redirect || '/home';
+    var path = req.body.redirect || 'oauth/authorize/as';
 
     return res.redirect(util.format('/%s?client_id=%s&redirect_uri=%s', path, req.query.client_id, req.query.redirect_uri));
   });
