@@ -103,13 +103,13 @@ describe('user model', function() {
       });
     });
 
-    it('should require a name', function(done) {
+    it('should require a password', function(done) {
       var json = {
         username: 'test-deficient' + Date.now()
       };
 
       User.create(json, function(err, profile) {
-        expect(err.message).equal('Invalid user: please provide a name section');
+        expect(err.message).equal('Please provide a password which is 8 characters or longer');
 
         done();
       });
@@ -118,6 +118,7 @@ describe('user model', function() {
     it('should ignore invalid revisions', function(done) {
       var json = {
         username: 'test-deficient' + Date.now(),
+        password: 'a390j3qawoeszidj',
         name: {},
         revision: 'notanexpectedtrevision'
       };
@@ -141,6 +142,7 @@ describe('user model', function() {
         id: 'aa9e1e0042client984created95uuid' + Date.now(),
         revision: '3-' + (Date.now() - 14 * 1000 * 1000),
         username: 'test-' + Date.now(),
+        password: 'a390j3qawoeszidj',
         name: {
           familyName: 'Test'
         },
@@ -182,8 +184,8 @@ describe('user model', function() {
             familyName: 'Test'
           },
           language: 'ko',
-          salt: '',
-          hash: '',
+          salt: profile.salt,
+          hash: profile.hash,
           // dates will be the db dates
           createdAt: profile.createdAt,
           updatedAt: profile.updatedAt
@@ -196,6 +198,7 @@ describe('user model', function() {
     it('should save a new user', function(done) {
       var json = {
         username: 'test-abc' + Date.now(),
+        password: 'a390j3qawoeszidj',
         name: {}
       };
 
@@ -321,6 +324,7 @@ describe('user model', function() {
       describe('deletion', function() {
         var userToDelete = {
           username: 'test-delete' + Date.now(),
+          password: 'a390j3qawoeszidj',
           name: {}
         };
 

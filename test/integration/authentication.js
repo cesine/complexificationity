@@ -2,10 +2,11 @@
 
 var expect = require('chai').expect;
 var supertest = require('supertest');
+var User = require('./../../models/user');
 
 var service = require('./../../');
 
-describe.only('/authenticate', function() {
+describe('/authenticate', function() {
   describe('GET /authenticate/login', function() {
     it('should display', function(done) {
       supertest(service)
@@ -134,7 +135,7 @@ describe.only('/authenticate', function() {
     });
   });
 
-  describe.only('GET /authenticate/signup', function() {
+  describe('GET /authenticate/signup', function() {
     it('should display', function(done) {
       supertest(service)
         .get('/authenticate/signup/')
@@ -181,4 +182,139 @@ describe.only('/authenticate', function() {
     });
   });
 
+  describe('POST /authenticate/register', function() {
+    before(function(done) {
+      User.init();
+
+      User.create({
+        username: 'test-user',
+        password: 'aje24wersdfgs324rfe+woe'
+      }, function(err) {
+        done();
+      });
+    });
+
+    it('should require a body', function(done) {
+      supertest(service)
+        .post('/authenticate/register')
+        .expect(403)
+        .expect('Content-Type', 'application/json; charset=utf-8')
+        .end(function(err, res) {
+          if (err) throw err;
+
+          expect(res.body).to.deep.equal({
+            message: 'Please provide a username which is 4 characters or longer and a password which is 8 characters or longer',
+            error: res.body.error,
+            status: 403
+          });
+
+          done();
+        });
+    });
+
+    it('should require a username', function(done) {
+      supertest(service)
+        .post('/authenticate/register')
+        .send({
+          password: 'aje24wersdfgs324rfe+woe'
+        })
+        .expect(403)
+        .expect('Content-Type', 'application/json; charset=utf-8')
+        .end(function(err, res) {
+          if (err) throw err;
+
+          expect(res.body).to.deep.equal({
+            message: 'Please provide a username which is 4 characters or longer and a password which is 8 characters or longer',
+            error: res.body.error,
+            status: 403
+          });
+
+          done();
+        });
+    });
+
+    it('should require a password', function(done) {
+      supertest(service)
+        .post('/authenticate/register')
+        .send({
+          username: 'test-user',
+        })
+        .expect(403)
+        .expect('Content-Type', 'application/json; charset=utf-8')
+        .end(function(err, res) {
+          if (err) throw err;
+
+          expect(res.body).to.deep.equal({
+            message: 'Please provide a password which is 8 characters or longer',
+            error: res.body.error,
+            status: 403
+          });
+
+          done();
+        });
+    });
+
+    it('should require non-trivial password', function(done) {
+      supertest(service)
+        .post('/authenticate/register')
+        .send({
+          username: 'test-user',
+          password: 'test'
+        })
+        .expect(403)
+        .expect('Content-Type', 'application/json; charset=utf-8')
+        .end(function(err, res) {
+          if (err) throw err;
+
+          expect(res.body).to.deep.equal({
+            message: 'Please provide a password which is 8 characters or longer',
+            error: res.body.error,
+            status: 403
+          });
+
+          done();
+        });
+    });
+
+    it('should not register an existing username', function(done) {
+      supertest(service)
+        .post('/authenticate/register?client_id=abc-li-12-li&redirect_uri=http%3A%2F%2Flocalhost%3A8011%2Fsome%2Fplace%2Fusers%3Fwith%3Dother-stuff')
+        .send({
+          username: 'test-user',
+          password: 'aje24wersdfgs324rfe+woe'
+        })
+        .expect(403)
+        .expect('Content-Type', 'application/json; charset=utf-8')
+        .end(function(err, res) {
+          if (err) throw err;
+
+          expect(res.body).to.deep.equal({
+            message: 'Username test-user is already taken, please try another username',
+            error: res.body.error,
+            status: 403
+          });
+
+          done();
+        });
+    });
+
+    it('should register and redirect to the requested url', function(done) {
+      supertest(service)
+        .post('/authenticate/register?client_id=abc-li-12-li&redirect_uri=http%3A%2F%2Flocalhost%3A8011%2Fsome%2Fplace%2Fusers%3Fwith%3Dother-stuff')
+        .send({
+          username: 'test-' + Date.now(),
+          password: 'aje24wersdfgs324rfe+woe'
+        })
+        .expect(302)
+        .expect('Content-Type', 'text/plain; charset=utf-8')
+        .end(function(err, res) {
+          if (err) throw err;
+
+          expect(res.text).to.contain('Found. Redirecting');
+          expect(res.text).to.contain('to /oauth/authorize/as?client_id=abc-li-12-li&redirect_uri=http://localhost:8011/some/place/users?with=other-stuff');
+
+          done();
+        });
+    });
+  });
 });

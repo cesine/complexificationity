@@ -145,8 +145,12 @@ function increaseRevision(revision) {
  * @return {Promise}
  */
 function create(profile, callback) {
-  if (!profile || !profile.name) {
-    return callback(new Error('Invalid user: please provide a name section'));
+  if (!profile) {
+    return callback(new Error('Please provide a user'));
+  }
+
+  if (!profile || !profile.password || profile.password.length < 8) {
+    return callback(new Error('Please provide a password which is 8 characters or longer'));
   }
 
   delete profile.hash;
