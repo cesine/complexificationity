@@ -133,4 +133,52 @@ describe.only('/authenticate', function() {
         });
     });
   });
+
+  describe.only('GET /authenticate/signup', function() {
+    it('should display', function(done) {
+      supertest(service)
+        .get('/authenticate/signup/')
+        .expect(200)
+        .expect('Content-Type', 'text/html; charset=UTF-8')
+        .end(function(err, res) {
+          if (err) throw err;
+
+          expect(res.text).to.contain('Signup');
+          expect(res.text).to.contain('button');
+          expect(res.text).to.contain('Password');
+
+          done();
+        });
+    });
+
+    it('should serve client side files', function(done) {
+      supertest(service)
+        .get('/authenticate/signup/signup.js')
+        .expect(200)
+        .expect('Content-Type', 'application/javascript')
+        .end(function(err, res) {
+          if (err) throw err;
+
+          expect(res.text).equal('');
+
+          done();
+        });
+    });
+
+    it('should redirect to signup/', function(done) {
+      supertest(service)
+        .get('/authenticate/signup?anything=query_should_be_kept')
+        .expect(303)
+        .expect('Content-Type', 'text/html; charset=UTF-8')
+        .end(function(err, res) {
+          if (err) throw err;
+
+          expect(res.text).to.contain('Redirecting');
+          expect(res.text).to.contain('?anything=query_should_be_kept');
+
+          done();
+        });
+    });
+  });
+
 });
