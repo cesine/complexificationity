@@ -1,7 +1,12 @@
 #!/usr/bin/env node
-var service = require('../service');
+var url = require('url');
 
-service.set('port', process.env.PORT || 3000);
+var service = require('../service');
+var config = require('../config');
+
+var url = url.parse(config.url);
+
+service.set('port', url.port);
 
 var server = service.listen(service.get('port'), function() {
   console.log('Express server listening on port ' + server.address().port);
