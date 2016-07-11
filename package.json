@@ -6,6 +6,7 @@
     "coverage": "istanbul cover _mocha -- --recursive test; istanbul check-coverage  --statements 90 --functions 90 --branches 77 --lines 90",
     "coveralls": "cat ./coverage/lcov.info | coveralls",
     "lint": "jshint config models middleware routes test service.js",
+    "postinstall": "bower install",
     "start": "node ./bin/www",
     "test": "mocha --recursive test",
     "test:debug": "node-debug _mocha test/integration/oauth.js"
