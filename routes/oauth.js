@@ -17,6 +17,8 @@ var oauth = require('./../middleware/oauth');
  * @param  {Function} next
  */
 function getAuthorize(req, res) {
+  debug('req.app.locals', req.app.locals);
+
   // Redirect anonymous users to login page.
   if (!req.app.locals.user) {
     return res.redirect(util.format('/login?redirect=%s&client_id=%s&' +
@@ -38,8 +40,11 @@ function getAuthorize(req, res) {
  * @param  {Function} next
  */
 function postAuthorize(req, res) {
+  debug('req.app.locals', req.app.locals);
+
   // Redirect anonymous users to login page.
   if (!req.app.locals.user) {
+    debug(req.query, req.params);
     return res.redirect(util.format('/login?client_id=%s&redirect_uri=%s',
       req.query.client_id, req.query.redirect_uri));
   }
