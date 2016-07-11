@@ -6,7 +6,7 @@ var supertest = require('supertest');
 var service = require('./../../');
 
 describe('/oauth', function() {
-  describe.only('POST /oauth/authorize', function() {
+  describe('POST /oauth/authorize', function() {
     it('should redirect to login if user is not present', function(done) {
       supertest(service)
         .post('/oauth/authorize')

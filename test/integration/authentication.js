@@ -2,9 +2,11 @@
 
 var expect = require('chai').expect;
 var supertest = require('supertest');
-var User = require('./../../models/user');
+var jsonwebtoken = require('jsonwebtoken');
 
+var config = require('./../../config');
 var service = require('./../../');
+var User = require('./../../models/user');
 
 describe('/authenticate', function() {
   before(function(done) {
@@ -137,12 +139,44 @@ describe('/authenticate', function() {
         })
         .expect(302)
         .expect('Content-Type', 'text/plain; charset=utf-8')
+        .expect('Set-Cookie', /Authorization: Bearer /)
+        .expect('Authorization', /Bearer /)
         .end(function(err, res) {
           if (err) throw err;
 
           expect(res.text).to.contain('Found. Redirecting');
           expect(res.text).to.contain('to /oauth/authorize/as?client_id=abc-li-12-li' +
             '&redirect_uri=http://localhost:8011/some/place/users?with=other-stuff');
+
+          var token = res.headers.authorization.replace(/Bearer /, '');
+          expect(token).exists;
+
+          var decoded = jsonwebtoken.decode(token);
+          expect(decoded).to.deep.equal({
+            name: {
+              givenName: '',
+              familyName: ''
+            },
+            id: 'test-user-efg_random_uuid',
+            revision: decoded.revision,
+            deletedAt: null,
+            deletedReason: '',
+            username: 'test-user',
+            email: '',
+            gravatar: decoded.gravatar,
+            description: '',
+            language: '',
+            hash: decoded.hash,
+            createdAt: decoded.createdAt,
+            updatedAt: decoded.updatedAt,
+            iat: decoded.iat,
+            exp: decoded.exp
+          });
+
+          var verified = jsonwebtoken.verify(token, config.key.public, {
+            algorithm: config.key.algorithm
+          });
+          expect(verified).to.deep.equal(decoded);
 
           done();
         });
