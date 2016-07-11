@@ -1,4 +1,5 @@
 'use strict';
+/*jshint camelcase: false */
 
 var expect = require('chai').expect;
 
@@ -35,9 +36,9 @@ describe('oauth client model', function() {
     OAuthToken.init();
 
     setTimeout(function() {
-      OAuthClient.create(client, function(err, result) {
-        User.create(user, function(err, result) {
-          OAuthToken.create(token, function(err, result) {
+      OAuthClient.create(client, function() {
+        User.create(user, function() {
+          OAuthToken.create(token, function() {
             done();
           });
         });
@@ -108,7 +109,7 @@ describe('oauth client model', function() {
               throttle: null,
               redirect_uri: null,
               deletedAt: null,
-              deleted_reason: null,
+              deletedReason: null,
               createdAt: client.createdAt,
               updatedAt: client.updatedAt
             });
@@ -146,7 +147,7 @@ describe('oauth client model', function() {
             .create({
               client_id: 'testm-hij',
               deletedAt: new Date(1341967961140),
-              deleted_reason: 'spidering on July 9 2012'
+              deletedReason: 'spidering on July 9 2012'
             }, function() {
               done();
             });
@@ -172,7 +173,7 @@ describe('oauth client model', function() {
         var client = clients[0];
         expect(client.client_id).to.exist;
         expect(client.title).to.exist;
-        expect(client.deleted_reason).to.be.null;
+        expect(client.deletedReason).to.be.null;
 
         done();
       });
@@ -181,7 +182,7 @@ describe('oauth client model', function() {
     it('should list an admin view of deactivated clients', function(done) {
       OAuthClient.list({
         where: {
-          deleted_reason: {
+          deletedReason: {
             $like: '%spider%'
           }
         },
@@ -196,7 +197,7 @@ describe('oauth client model', function() {
 
         var client = clients[0];
         expect(client.client_id).to.exist;
-        expect(client.deleted_reason).to.exist;
+        expect(client.deletedReason).to.exist;
 
         done();
       });

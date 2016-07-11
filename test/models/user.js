@@ -26,7 +26,7 @@ describe('user model', function() {
         id: '',
         revision: '',
         deletedAt: null,
-        deleted_reason: '',
+        deletedReason: '',
         description: '',
         email: '',
         hash: '',
@@ -52,7 +52,7 @@ describe('user model', function() {
         familyName: '',
         revision: '',
         deletedAt: null,
-        deleted_reason: '',
+        deletedReason: '',
         description: '',
         email: '',
         hash: '',
@@ -105,7 +105,7 @@ describe('user model', function() {
         username: 'test-deficient' + Date.now()
       };
 
-      User.create(json, function(err, profile) {
+      User.create(json, function(err) {
         expect(err.message).equal('Please provide a password which is 8 characters or longer');
 
         done();
@@ -169,7 +169,7 @@ describe('user model', function() {
           id: json.id,
           revision: profile.revision,
           deletedAt: null,
-          deleted_reason: '',
+          deletedReason: '',
           username: json.username,
           // content wont be sanitized
           description: '<script src=\"http://haha.com/cleanme\"></script>',
@@ -259,7 +259,7 @@ describe('user model', function() {
             id: profile.id,
             revision: profile.revision,
             deletedAt: null,
-            deleted_reason: '',
+            deletedReason: '',
             username: 'test-efg',
             description: 'Friendly',
             email: '',
@@ -301,7 +301,7 @@ describe('user model', function() {
             id: profile.id,
             revision: profile.revision,
             deletedAt: null,
-            deleted_reason: '',
+            deletedReason: '',
             username: 'test-efg',
             // should not overwrite previous values if patch is missing
             description: 'Friendly',
@@ -325,14 +325,14 @@ describe('user model', function() {
         };
 
         before(function(done) {
-          User.create(userToDelete, function(err, profile) {
+          User.create(userToDelete, function() {
             done();
           });
         });
 
         it('should require a user', function(done) {
           User.flagAsDeleted(null, function(err) {
-            expect(err.message).equal('Please provide a username and a deleted_reason')
+            expect(err.message).equal('Please provide a username and a deletedReason');
 
             done();
           });
@@ -340,7 +340,7 @@ describe('user model', function() {
 
         it('should require a username', function(done) {
           User.flagAsDeleted({}, function(err) {
-            expect(err.message).equal('Please provide a username and a deleted_reason')
+            expect(err.message).equal('Please provide a username and a deletedReason');
 
             done();
           });
@@ -350,7 +350,7 @@ describe('user model', function() {
           User.flagAsDeleted({
             username: 'test-deleted' + Date.now()
           }, function(err) {
-            expect(err.message).equal('Please provide a username and a deleted_reason')
+            expect(err.message).equal('Please provide a username and a deletedReason');
 
             done();
           });
@@ -359,9 +359,9 @@ describe('user model', function() {
         it('should warn if the user doesnt exist', function(done) {
           User.flagAsDeleted({
             username: 'test-deleted' + Date.now(),
-            deleted_reason: 'for testing purposes'
-          }, function(err, user) {
-            expect(err.message).equal('Cannot delete user which doesn\'t exist')
+            deletedReason: 'for testing purposes'
+          }, function(err) {
+            expect(err.message).equal('Cannot delete user which doesn\'t exist');
 
             done();
           });
@@ -370,13 +370,13 @@ describe('user model', function() {
         it('should flag user as deleted', function(done) {
           User.flagAsDeleted({
             username: userToDelete.username,
-            deleted_reason: 'for testing purposes'
+            deletedReason: 'for testing purposes'
           }, function(err, user) {
             if (err) {
               return done(err);
             }
 
-            expect(user.deleted_reason).equal('for testing purposes');
+            expect(user.deletedReason).equal('for testing purposes');
             expect(user.deletedAt.toDateString()).equal(new Date().toDateString());
 
             done();
@@ -398,7 +398,7 @@ describe('user model', function() {
 
     before(function(done) {
       User.init();
-      User.create(userWithPassword, function(err, profile) {
+      User.create(userWithPassword, function() {
         done();
       });
     });

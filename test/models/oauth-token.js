@@ -1,4 +1,5 @@
 'use strict';
+/*jshint camelcase: false */
 
 var expect = require('chai').expect;
 
@@ -89,7 +90,8 @@ describe('oauth token model', function() {
             expect(token.access_token_expires_on instanceof Date).true;
             expect(token.refresh_token_expires_on instanceof Date).true;
 
-            expect(JSON.stringify(token.access_token_expires_on)).equal('"2016-07-10T00:00:56.432Z"');
+            expect(JSON.stringify(token.access_token_expires_on))
+              .equal('"2016-07-10T00:00:56.432Z"');
 
             done();
           });
@@ -133,20 +135,20 @@ describe('oauth token model', function() {
           OauthToken
             .create({
               access_token: 'testm-abc',
-              client_id: 'test-client',
-              user_id: 'test-user'
+              client_id: client.id,
+              user_id: user.id
             }, function() {
               OauthToken
                 .create({
                   access_token: 'testm-efg',
-                  client_id: 'test-client',
-                  user_id: 'test-user'
+                  client_id: client.id,
+                  user_id: user.id
                 }, function() {
                   OauthToken
                     .create({
                       access_token: 'testm-hij',
-                      client_id: 'test-client',
-                      user_id: 'test-user'
+                      client_id: client.id,
+                      user_id: user.id
                     }, function() {
                       done();
                     });
@@ -175,7 +177,7 @@ describe('oauth token model', function() {
         expect(token.access_token).to.exist;
         expect(token.client_id).to.exist;
         expect(token.user_id).to.exist;
-        expect(token.deleted_reason).to.be.null;
+        expect(token.deletedReason).to.be.null;
 
         done();
       });

@@ -32,6 +32,8 @@ describe('oauth routes', function() {
       }
     }, function(err, res) {
       expect(true).to.be.true;
+      expect(err).to.be.undefined;
+      expect(res).to.be.undefined;
     });
   });
 });

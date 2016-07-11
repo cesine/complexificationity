@@ -14,7 +14,7 @@ describe('/authenticate', function() {
       id: 'test-user-efg_random_uuid',
       username: 'test-user',
       password: 'aje24wersdfgs324rfe+woe'
-    }, function(err) {
+    }, function() {
       done();
     });
   });
@@ -129,7 +129,8 @@ describe('/authenticate', function() {
 
     it('should login and redirect to the requested url', function(done) {
       supertest(service)
-        .post('/authenticate/login?client_id=abc-li-12-li&redirect_uri=http%3A%2F%2Flocalhost%3A8011%2Fsome%2Fplace%2Fusers%3Fwith%3Dother-stuff')
+        .post('/authenticate/login?client_id=abc-li-12-li&' +
+          'redirect_uri=http%3A%2F%2Flocalhost%3A8011%2Fsome%2Fplace%2Fusers%3Fwith%3Dother-stuff')
         .send({
           username: 'test-user',
           password: 'aje24wersdfgs324rfe+woe'
@@ -140,7 +141,8 @@ describe('/authenticate', function() {
           if (err) throw err;
 
           expect(res.text).to.contain('Found. Redirecting');
-          expect(res.text).to.contain('to /oauth/authorize/as?client_id=abc-li-12-li&redirect_uri=http://localhost:8011/some/place/users?with=other-stuff');
+          expect(res.text).to.contain('to /oauth/authorize/as?client_id=abc-li-12-li' +
+            '&redirect_uri=http://localhost:8011/some/place/users?with=other-stuff');
 
           done();
         });
@@ -204,7 +206,8 @@ describe('/authenticate', function() {
           if (err) throw err;
 
           expect(res.body).to.deep.equal({
-            message: 'Please provide a username which is 4 characters or longer and a password which is 8 characters or longer',
+            message: 'Please provide a username which is 4 characters' +
+              ' or longer and a password which is 8 characters or longer',
             error: res.body.error,
             status: 403
           });
@@ -225,7 +228,8 @@ describe('/authenticate', function() {
           if (err) throw err;
 
           expect(res.body).to.deep.equal({
-            message: 'Please provide a username which is 4 characters or longer and a password which is 8 characters or longer',
+            message: 'Please provide a username which is 4 characters' +
+              ' or longer and a password which is 8 characters or longer',
             error: res.body.error,
             status: 403
           });
@@ -279,7 +283,8 @@ describe('/authenticate', function() {
 
     it('should not register an existing username', function(done) {
       supertest(service)
-        .post('/authenticate/register?client_id=abc-li-12-li&redirect_uri=http%3A%2F%2Flocalhost%3A8011%2Fsome%2Fplace%2Fusers%3Fwith%3Dother-stuff')
+        .post('/authenticate/register?client_id=abc-li-12-li&' +
+          'redirect_uri=http%3A%2F%2Flocalhost%3A8011%2Fsome%2Fplace%2Fusers%3Fwith%3Dother-stuff')
         .send({
           username: 'test-user',
           password: 'aje24wersdfgs324rfe+woe'
@@ -301,7 +306,8 @@ describe('/authenticate', function() {
 
     it('should register and redirect to the requested url', function(done) {
       supertest(service)
-        .post('/authenticate/register?client_id=abc-li-12-li&redirect_uri=http%3A%2F%2Flocalhost%3A8011%2Fsome%2Fplace%2Fusers%3Fwith%3Dother-stuff')
+        .post('/authenticate/register?client_id=abc-li-12-li&redirect_uri=' +
+          'http%3A%2F%2Flocalhost%3A8011%2Fsome%2Fplace%2Fusers%3Fwith%3Dother-stuff')
         .send({
           username: 'test-' + Date.now(),
           password: 'aje24wersdfgs324rfe+woe'
@@ -312,7 +318,8 @@ describe('/authenticate', function() {
           if (err) throw err;
 
           expect(res.text).to.contain('Found. Redirecting');
-          expect(res.text).to.contain('to /oauth/authorize/as?client_id=abc-li-12-li&redirect_uri=http://localhost:8011/some/place/users?with=other-stuff');
+          expect(res.text).to.contain('to /oauth/authorize/as?client_id=abc-li-12-li&' +
+            'redirect_uri=http://localhost:8011/some/place/users?with=other-stuff');
 
           done();
         });

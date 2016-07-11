@@ -1,6 +1,10 @@
 'use strict';
+/*jshint camelcase: false */
+
 var debug = require('debug')('oauth:routes');
 var express = require('express');
+var util = require('util');
+
 var router = express.Router();
 
 var errorMiddleware = require('./../middleware/error');
@@ -12,16 +16,18 @@ var oauth = require('./../middleware/oauth');
  * @param  {Response} res
  * @param  {Function} next
  */
-function getAuthorize(req, res, next) {
+function getAuthorize(req, res) {
   // Redirect anonymous users to login page.
   if (!req.app.locals.user) {
-    return res.redirect(util.format('/login?redirect=%s&client_id=%s&redirect_uri=%s', req.path, req.query.client_id, req.query.redirect_uri));
+    return res.redirect(util.format('/login?redirect=%s&client_id=%s&' +
+      'redirect_uri=%s', req.path, req.query.client_id, req.query.redirect_uri));
   }
 
-  return render('authorize', {
-    client_id: req.query.client_id,
-    redirect_uri: req.query.redirect_uri
-  });
+  // return res.json('authorize', {
+  //   client_id: req.query.client_id,
+  //   redirect_uri: req.query.redirect_uri
+  // });
+  res.send('TODO');
 }
 
 /**
@@ -31,13 +37,15 @@ function getAuthorize(req, res, next) {
  * @param  {Response} res
  * @param  {Function} next
  */
-function postAuthorize(req, res, next) {
+function postAuthorize(req, res) {
   // Redirect anonymous users to login page.
   if (!req.app.locals.user) {
-    return res.redirect(util.format('/login?client_id=%s&redirect_uri=%s', req.query.client_id, req.query.redirect_uri));
+    return res.redirect(util.format('/login?client_id=%s&redirect_uri=%s',
+      req.query.client_id, req.query.redirect_uri));
   }
 
-  return oauth.authorize();
+  // return oauth.authorize();
+  res.send('TODO');
 }
 
 /**
@@ -47,13 +55,15 @@ function postAuthorize(req, res, next) {
  * @param  {Response} res
  * @param  {Function} next
  */
-function getToken(req, res, next) {
+function getToken(req, res) {
   // Redirect anonymous users to login page.
   if (!req.app.locals.user) {
-    return res.redirect(util.format('/login?client_id=%s&redirect_uri=%s', req.query.client_id, req.query.redirect_uri));
+    return res.redirect(util.format('/login?client_id=%s&redirect_uri=%s',
+      req.query.client_id, req.query.redirect_uri));
   }
 
-  return oauth.authorize();
+  // return oauth.authorize();
+  res.send('TODO');
 }
 
 /**
@@ -61,7 +71,7 @@ function getToken(req, res, next) {
  *
  * @type {[type]}
  */
-function postToken(req, res, next){
+function postToken(req, res, next) {
   debug('postToken', req.query, res.headers);
 
   var middleware = oauth.token({
@@ -73,7 +83,8 @@ function postToken(req, res, next){
 // service.use(service.oauth.authorise()); // service.oauth.authorise is not a function
 
 // Comes from https://github.com/oauthjs/node-oauth2-server#quick-start
-// service.use(service.oauth.authenticate()); // Invalid argument: `response` must be an instance of Response
+// Invalid argument: `response` must be an instance of Response
+// service.use(service.oauth.authenticate());
 
 router.get('/authorize', getAuthorize);
 router.post('/authorize', postAuthorize);

@@ -9,7 +9,6 @@ var logger = require('morgan');
 var authenticationRoutes = require('./routes/authentication').router;
 var oauthRoutes = require('./routes/oauth').router;
 var errorsMiddleware = require('./middleware/error');
-var oauthMiddleware = require('./middleware/oauth');
 var routes = require('./routes/index').router;
 var userRoutes = require('./routes/user').router;
 
@@ -40,7 +39,8 @@ service.use(cors());
 /**
  * Middleware
  */
- // The example attaches it to the express https://github.com/oauthjs/express-oauth-server#quick-start
+// The example attaches it to the express
+// https://github.com/oauthjs/express-oauth-server#quick-start
 // service.oauth = oauthMiddleware;
 
 /**

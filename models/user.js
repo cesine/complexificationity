@@ -27,7 +27,7 @@ var FLAT_SCHEMA = {
   },
   revision: Sequelize.STRING,
   deletedAt: Sequelize.DATE,
-  deleted_reason: Sequelize.STRING,
+  deletedReason: Sequelize.STRING,
   username: {
     type: Sequelize.STRING,
     unique: true
@@ -139,6 +139,23 @@ function increaseRevision(revision) {
 }
 
 /**
+ * Verify a user in the database
+ * @param  {User}   profile
+ * @return {Promise}
+ */
+function hashPassword(password) {
+  if (!password) {
+    return new Error('Please provide a password');
+  }
+
+  var salt = bcrypt.genSaltSync(10);
+  return {
+    salt: salt,
+    hash: bcrypt.hashSync(password, salt)
+  };
+}
+
+/**
  * Create a user in the database
  * @param  {User}   profile
  * @return {Promise}
@@ -209,23 +226,6 @@ function read(profile, callback) {
  * @param  {User}   profile
  * @return {Promise}
  */
-function hashPassword(password) {
-  if (!password) {
-    return new Error('Please provide a password');
-  }
-
-  var salt = bcrypt.genSaltSync(10);
-  return {
-    salt: salt,
-    hash: bcrypt.hashSync(password, salt)
-  };
-}
-
-/**
- * Verify a user in the database
- * @param  {User}   profile
- * @return {Promise}
- */
 function verifyPassword(profile, callback) {
   if (!profile || !profile.username || !profile.password) {
     return callback(new Error('Please provide a username and a password'));
@@ -277,8 +277,6 @@ function changePassword(profile, callback) {
         return callback(new Error('Please set the password before changing it'));
       }
 
-      var hash = hashPassword(profile.password);
-
       if (bcrypt.compareSync(profile.password, dbUser.dataValues.hash)) {
         return callback(new Error('Password doesn\'t match your old password'));
       }
@@ -305,7 +303,6 @@ function save(profile, callback) {
   if (!profile) {
     return callback(new Error('Please provide a user'));
   }
-
 
   User
     .find({
@@ -396,8 +393,8 @@ function list(options, callback) {
  * @return {Promise}        [description]
  */
 function flagAsDeleted(profile, callback) {
-  if (!profile || !profile.username || !profile.deleted_reason) {
-    return callback(new Error('Please provide a username and a deleted_reason'));
+  if (!profile || !profile.username || !profile.deletedReason) {
+    return callback(new Error('Please provide a username and a deletedReason'));
   }
 
   User
@@ -412,7 +409,7 @@ function flagAsDeleted(profile, callback) {
       }
 
       dbUser.deletedAt = new Date();
-      dbUser.deleted_reason = profile.deleted_reason;
+      dbUser.deletedReason = profile.deletedReason;
 
       dbUser
         .save(dbUser)

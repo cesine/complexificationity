@@ -1,8 +1,8 @@
 'use strict';
+/*jshint camelcase: false */
 
 var debug = require('debug')('authentication');
 var express = require('express');
-var path = require('path');
 var sequelize = require('sequelize');
 var util = require('util');
 
@@ -27,6 +27,7 @@ function postLogin(req, res, next) {
     username: req.body.username
   }, function(err, user) {
     if (err) {
+      debug('error logging in', err, user);
       err.status = 403;
       // the error handler will send cleaned json which can be displayed to the user
       return next(err, req, res, next);
@@ -34,7 +35,8 @@ function postLogin(req, res, next) {
     // Successful logins should send the user back to /oauth/authorize.
     var path = req.body.redirect || 'oauth/authorize/as';
 
-    return res.redirect(util.format('/%s?client_id=%s&redirect_uri=%s', path, req.query.client_id, req.query.redirect_uri));
+    return res.redirect(util.format('/%s?client_id=%s&redirect_uri=%s', path,
+      req.query.client_id, req.query.redirect_uri));
   });
 }
 
@@ -45,24 +47,29 @@ function postLogin(req, res, next) {
  * @param  {Function} next
  */
 function postRegister(req, res, next) {
+  var err;
+
   if (!req.body || !req.body.username || req.body.username.length < 4) {
-    var err = new Error('Please provide a username which is 4 characters or longer and a password which is 8 characters or longer');
+    err = new Error('Please provide a username which is 4 characters or longer ' +
+      'and a password which is 8 characters or longer');
     err.status = 403;
     return next(err, req, res, next);
   }
 
   if (!req.body || !req.body.password || req.body.password.length < 8) {
-    var err = new Error('Please provide a password which is 8 characters or longer');
+    err = new Error('Please provide a password which is 8 characters or longer');
     err.status = 403;
     return next(err, req, res, next);
   }
 
   User.create(req.body, function(err, user) {
     if (err) {
-      debug('Error registering the user', err);
+      debug('Error registering the user', err, user);
 
-      if (err instanceof sequelize.UniqueConstraintError && err.fields && err.fields.indexOf('username') > -1) {
-        err = new Error('Username ' + req.body.username + ' is already taken, please try another username');
+      if (err instanceof sequelize.UniqueConstraintError &&
+        err.fields && err.fields.indexOf('username') > -1) {
+        err = new Error('Username ' + req.body.username + ' is already taken,' +
+          ' please try another username');
         err.status = 403;
       }
 
@@ -72,7 +79,8 @@ function postRegister(req, res, next) {
     // Successful logins should send the user back to /oauth/authorize.
     var path = req.body.redirect || 'oauth/authorize/as';
 
-    return res.redirect(util.format('/%s?client_id=%s&redirect_uri=%s', path, req.query.client_id, req.query.redirect_uri));
+    return res.redirect(util.format('/%s?client_id=%s&redirect_uri=%s',
+      path, req.query.client_id, req.query.redirect_uri));
   });
 }
 

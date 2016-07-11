@@ -2,7 +2,6 @@
 
 var expect = require('chai').expect;
 var supertest = require('supertest');
-var User = require('./../../models/user');
 
 var service = require('./../../');
 
@@ -11,7 +10,8 @@ describe('/oauth', function() {
     it('should validate the authorization code', function(done) {
       supertest(service)
         .post('/oauth/token')
-        .send('client_id=test-client&client_secret=test-secret&grant_type=authorization_code&username=test-user&code=ABC')
+        .send('client_id=test-client&client_secret=test-secret' +
+          '&grant_type=authorization_code&username=test-user&code=ABC')
         .expect(403)
         .expect('Content-Type', 'application/json; charset=utf-8')
         // .expect({
@@ -24,7 +24,7 @@ describe('/oauth', function() {
           expect(res.body).to.deep.equal({
             error: res.body.error,
             status: 403,
-            message: "Code is not authorized"
+            message: 'Code is not authorized'
           });
 
           done();

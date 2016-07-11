@@ -1,4 +1,5 @@
 'use strict';
+/*jshint camelcase: false */
 
 var debug = require('debug')('oauth:model');
 var Sequelize = require('sequelize');
@@ -34,7 +35,7 @@ var oauthClient = sequelize.define('oauth_clients', {
   day_limit: Sequelize.BIGINT, // requests per calendar day
   throttle: Sequelize.INTEGER, // miliseconds
   deletedAt: Sequelize.DATE,
-  deleted_reason: Sequelize.TEXT
+  deletedReason: Sequelize.TEXT
 });
 
 /**
@@ -89,7 +90,14 @@ function list(options, callback) {
     deletedAt: null
   };
 
-  options.attributes = ['client_id', 'title', 'description', 'contact', 'createdAt', 'deleted_reason'];
+  options.attributes = [
+    'client_id',
+    'title',
+    'description',
+    'contact',
+    'createdAt',
+    'deletedReason'
+  ];
 
   oauthClient
     .findAll(options)
@@ -189,7 +197,7 @@ var getClient = function(clientId, clientSecret) {
 
       AUTHORIZATION_CODE_TRANSIENT_STORE[code] = json;
       resolve(json);
-    })
+    });
   });
 };
 
@@ -214,7 +222,7 @@ var getAuthorizationCode = function(code) {
 var revokeAuthorizationCode = function(code) {
   debug('revokeAuthorizationCode', arguments);
 
-  return new Promise(function(resolve, reject) {
+  return new Promise(function(resolve) {
     delete AUTHORIZATION_CODE_TRANSIENT_STORE[code];
 
     resolve(true);

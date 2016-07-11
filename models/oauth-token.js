@@ -1,6 +1,6 @@
 'use strict';
+/*jshint camelcase: false */
 
-var debug = require('debug')('oauth-token');
 var Sequelize = require('sequelize');
 
 var sequelize = new Sequelize('database', 'id', 'password', {
@@ -23,7 +23,7 @@ var oauthToken = sequelize.define('oauth_tokens', {
   access_token_expires_on: Sequelize.DATE,
   client_id: Sequelize.TEXT,
   deletedAt: Sequelize.DATE,
-  deleted_reason: Sequelize.TEXT,
+  deletedReason: Sequelize.TEXT,
   refresh_token: Sequelize.TEXT,
   refresh_token_expires_on: Sequelize.DATE,
   user_id: {
@@ -95,7 +95,7 @@ function list(options, callback) {
     deletedAt: null
   };
 
-  options.attributes = ['access_token', 'client_id', 'user_id', 'deleted_reason'];
+  options.attributes = ['access_token', 'client_id', 'user_id', 'deletedReason'];
 
   oauthToken
     .findAll(options)
