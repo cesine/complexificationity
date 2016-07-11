@@ -1,7 +1,9 @@
 'use strict';
+var debug = require('debug')('oauth:routes');
 var express = require('express');
 var router = express.Router();
 
+var errorMiddleware = require('./../middleware/error');
 var oauth = require('./../middleware/oauth');
 
 /**
@@ -59,7 +61,19 @@ function getToken(req, res, next) {
  *
  * @type {[type]}
  */
-var postToken = oauth.token();
+function postToken(req, res, next){
+  debug('postToken', req.query, res.headers);
+
+  var middleware = oauth.token({
+    handleError: errorMiddleware
+  });
+  return middleware(req, res, next);
+}
+// comes from https://github.com/oauthjs/express-oauth-server/blob/master/index.js#L64
+// service.use(service.oauth.authorise()); // service.oauth.authorise is not a function
+
+// Comes from https://github.com/oauthjs/node-oauth2-server#quick-start
+// service.use(service.oauth.authenticate()); // Invalid argument: `response` must be an instance of Response
 
 router.get('/authorize', getAuthorize);
 router.post('/authorize', postAuthorize);

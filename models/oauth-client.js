@@ -1,8 +1,11 @@
 'use strict';
 
-var debug = require('debug')('oauth-client');
+var debug = require('debug')('oauth:model');
 var Sequelize = require('sequelize');
+var Promise = require('bluebird');
+var uuid = require('node-uuid');
 
+var OAuthError = require('oauth2-server/lib/errors/oauth-error');
 var OAuthToken = require('./oauth-token');
 var User = require('./user');
 
@@ -151,27 +154,72 @@ var getAccessToken = function(bearerToken, callback) {
 
 /**
  * Get client.
+ * Only seems to support a promise
+ * https://github.com/oauthjs/node-oauth2-server/issues/277
+ * Despite saying others are possible
+ * https://github.com/oauthjs/node-oauth2-server#upgrading-from-2x
  */
+var AUTHORIZATION_CODE_TRANSIENT_STORE = {};
+var getClient = function(clientId, clientSecret) {
+  debug('getClient', arguments);
 
-var getClient = function(clientId, clientSecret, callback) {
-  read({
-    client_id: clientId,
-    client_secret: clientSecret
-  }, function(err, client) {
-    if (err) {
-      return callback(err);
-    }
-    if (!client) {
-      return callback(null);
-    }
+  return new Promise(function(resolve, reject) {
+    read({
+      client_id: clientId,
+      client_secret: clientSecret
+    }, function(err, client) {
+      if (err) {
+        return reject(err);
+      }
+      if (!client) {
+        return reject(new Error('Client id or Client Secret is invalid'));
+      }
 
-    callback(null, {
-      clientId: client.client_id,
-      clientSecret: client.client_secret
-    });
-  })
+      // https://github.com/oauthjs/express-oauth-server/blob/master/test/integration/index_test.js#L144
+      // Seems to require a grants
+      // { grants: ['password'] }
+      // { grants: ['authorization_code'], redirectUris: ['http://example.com'] };
+      var code = uuid.v4();
+      var json = {
+        clientId: client.client_id,
+        clientSecret: client.client_secret,
+        grants: ['authorization_code'],
+        code: code
+      };
+
+      AUTHORIZATION_CODE_TRANSIENT_STORE[code] = json;
+      resolve(json);
+    })
+  });
 };
 
+var getAuthorizationCode = function(code) {
+  debug('getAuthorizationCode', arguments, AUTHORIZATION_CODE_TRANSIENT_STORE);
+
+  return new Promise(function(resolve, reject) {
+    var client = AUTHORIZATION_CODE_TRANSIENT_STORE[code];
+    if (client) {
+      delete AUTHORIZATION_CODE_TRANSIENT_STORE[code];
+      return resolve(client);
+    }
+    var err = new OAuthError('Code is not authorized', {
+      code: 403
+    });
+    err.status = 403;
+
+    reject(err);
+  });
+};
+
+var revokeAuthorizationCode = function(code) {
+  debug('revokeAuthorizationCode', arguments);
+
+  return new Promise(function(resolve, reject) {
+    delete AUTHORIZATION_CODE_TRANSIENT_STORE[code];
+
+    resolve(true);
+  });
+};
 /**
  * Get refresh token.
  */
@@ -240,6 +288,13 @@ var saveAccessToken = function(token, client, user, callback) {
       return callback(null);
     }
 
+    // https://github.com/oauthjs/express-oauth-server/blob/master/test/integration/index_test.js#L238
+    // {
+    //   accessToken: 'foobar',
+    //   client: {},
+    //   user: {}
+    // };
+
     callback(null, {
       access_token: token.access_token,
       access_token_expires_on: token.access_token_expires_on,
@@ -256,8 +311,12 @@ module.exports.flagAsDeleted = flagAsDeleted;
 module.exports.init = init;
 module.exports.list = list;
 module.exports.read = read;
+
 module.exports.getAccessToken = getAccessToken;
+module.exports.getAuthorizationCode = getAuthorizationCode;
+module.exports.revokeAuthorizationCode = revokeAuthorizationCode;
 module.exports.getClient = getClient;
 module.exports.getRefreshToken = getRefreshToken;
 module.exports.getUser = getUser;
 module.exports.saveAccessToken = saveAccessToken;
+module.exports.saveToken = saveAccessToken;

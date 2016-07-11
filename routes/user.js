@@ -41,8 +41,9 @@ function getList(req, res, next) {
   });
 }
 
-router.get('/', /* oauth.authorize(), */ getList);
-router.get('/:username', /* oauth.authorize(), */ getUser);
+// https://github.com/oauthjs/express-oauth-server/blob/master/index.js#L35
+router.get('/', /* oauth.authenticate(), */ getList);
+router.get('/:username', /* oauth.authenticate(), */ getUser);
 
 module.exports.getUser = getUser;
 module.exports.getList = getList;

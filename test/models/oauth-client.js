@@ -264,20 +264,20 @@ describe('oauth client model', function() {
     });
 
     describe('clients', function() {
-      it('should get a client', function(done) {
-        OAuthClient.getClient('test-client', 'test-secret', function(err, client_info) {
-          if (err) {
-            return done(err);
-          }
+      it('should get a client', function() {
+        return OAuthClient
+          .getClient('test-client', 'test-secret')
+          .then(function(client_info) {
 
-          expect(client_info).not.to.be.null;
-          expect(client_info).deep.equal({
-            clientId: 'test-client',
-            clientSecret: 'test-secret'
+            expect(client_info).not.to.be.null;
+            expect(client_info).deep.equal({
+              clientId: 'test-client',
+              clientSecret: 'test-secret',
+              code: client_info.code,
+              grants: ['authorization_code']
+            });
+
           });
-
-          done();
-        });
       });
     });
 
