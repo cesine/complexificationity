@@ -50,7 +50,9 @@ function postAuthorize(req, res) {
   }
 
   // return oauth.authorize();
-  res.send('TODO');
+  res.json({
+    'TODO': true
+  });
 }
 
 /**
@@ -82,6 +84,7 @@ function postToken(req, res, next) {
   var middleware = oauth.token({
     handleError: errorMiddleware
   });
+
   return middleware(req, res, next);
 }
 // comes from https://github.com/oauthjs/express-oauth-server/blob/master/index.js#L64

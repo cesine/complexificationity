@@ -11,10 +11,10 @@ describe('/oauth', function() {
       supertest(service)
         .post('/oauth/authorize')
         .query({
-          'client_id': 'test-client',
-          'client_secret': 'test-secret',
-          'grant_type': 'authorization_code',
-          'redirect_uri': 'http://localhost:8011/users'
+          client_id: 'test-client',
+          client_secret: 'test-secret',
+          grant_type: 'authorization_code',
+          redirect_uri: 'http://localhost:8011/users'
         })
         .expect(302)
         .expect('Content-Type', 'text/plain; charset=utf-8')
@@ -27,20 +27,49 @@ describe('/oauth', function() {
           done();
         });
     });
+
+    it('should return a token', function(done) {
+      supertest(service)
+        .post('/oauth/authorize')
+        .query({
+          client_id: 'test-client',
+          client_secret: 'test-secret',
+          grant_type: 'authorization_code',
+          redirect_uri: 'http://localhost:8011/users'
+        })
+        .set('Authorization', 'Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjp7ImdpdmVuTmFtZSI6IiIsImZhbWlseU5hbWUiOiIifSwiaWQiOiJ0ZXN0LXVzZXItZWZnX3JhbmRvbV91dWlkIiwicmV2aXNpb24iOiIxLTE0NjgyMDUzMDkwNjkiLCJkZWxldGVkQXQiOm51bGwsImRlbGV0ZWRSZWFzb24iOiIiLCJ1c2VybmFtZSI6InRlc3QtdXNlciIsImVtYWlsIjoiIiwiZ3JhdmF0YXIiOiI5Y2I0Nzk4ODc0NTkzNTI5MjhkNDEyNmY4OTg0NTRjZiIsImRlc2NyaXB0aW9uIjoiIiwibGFuZ3VhZ2UiOiIiLCJoYXNoIjoiJDJhJDEwJDUxOWkxeW5lQkw0cEgzaVRNdG51b09hRjZkbnFDV041QmgxRDh1bzY4S3pRWTdEcklHeFlxIiwiY3JlYXRlZEF0IjoiMjAxNi0wNy0xMVQwMjo0ODoyOS4xNTVaIiwidXBkYXRlZEF0IjoiMjAxNi0wNy0xMVQwMjo0ODoyOS4xNTVaIiwiaWF0IjoxNDY4MjEyMTY3fQ.HCOkTzqR4v-vSSmoXqTS6vHnZPbgWaEDEL2T6iqzwTdnF58sm_ufnFMDmWfxWzBMc15Y--2oCSEhAPdTVfMqh_h4CSkqDNH10MSCrF346OKHLugFT3BUSuvE6NMszBnItBX8P2r7lc6hhLnpbI4lvslCfQNI3PCoQssbmT1IZ3k')
+        .expect(200)
+        .expect('Content-Type', 'application/json; charset=utf-8')
+        // .expect({
+        //   access_token: 'foobar',
+        //   token_type: 'bearer'
+        // })
+        .end(function(err, res) {
+          if (err) throw err;
+
+          expect(res.body).to.deep.equal({
+            TODO: true
+          });
+
+          done();
+        });
+    });
   });
 
   describe('POST /oauth/token', function() {
     it('should validate the authorization code', function(done) {
       supertest(service)
         .post('/oauth/token')
-        .send('client_id=test-client&client_secret=test-secret' +
-          '&grant_type=authorization_code&username=test-user&code=ABC')
+        .type('form') // content must be application/x-www-form-urlencoded
+        .send({
+          client_id: 'test-client',
+          client_secret: 'test-secret',
+          grant_type: 'authorization_code',
+          username: 'test-user',
+          code: 'ABC'
+        })
         .expect(403)
         .expect('Content-Type', 'application/json; charset=utf-8')
-        // .expect({
-        //   access_token: 'foobar',
-        //   token_type: 'bearer'
-        // })
         .end(function(err, res) {
           if (err) throw err;
 

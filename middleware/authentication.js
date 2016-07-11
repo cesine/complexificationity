@@ -76,7 +76,7 @@ function requireAuthentication(req, res, next) {
 
   middleware(req, res, next);
 
-  next();
+  // next();
 }
 
 module.exports.jwt = jwt;
