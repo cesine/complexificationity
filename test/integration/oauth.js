@@ -22,7 +22,7 @@ describe('/oauth', function() {
           if (err) throw err;
 
           expect(res.text).to.contain('Found. Redirecting to');
-          expect(res.text).to.contain('to /login?client_id=test-client&redirect_uri=http://localhost:8011/users');
+          expect(res.text).to.contain('to /authentication/login?client_id=test-client&redirect_uri=http://localhost:8011/users');
 
           done();
         });

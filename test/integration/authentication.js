@@ -131,15 +131,16 @@ describe('/authentication', function() {
 
     it('should login and redirect to the requested url', function(done) {
       supertest(service)
-        .post('/authentication/login?client_id=abc-li-12-li&' +
-          'redirect_uri=http%3A%2F%2Flocalhost%3A8011%2Fsome%2Fplace%2Fusers%3Fwith%3Dother-stuff')
+        .post('/authentication/login')
         .send({
+          client_id: 'abc-li-12-li',
+          redirect_uri: 'http://localhost:8011/some/place/users?with=other-stuff',
           username: 'test-user',
           password: 'aje24wersdfgs324rfe+woe'
         })
         .expect(302)
         .expect('Content-Type', 'text/plain; charset=utf-8')
-        .expect('Set-Cookie', /Authorization: Bearer /)
+        .expect('Set-Cookie', /Authorization=Bearer /)
         .expect('Authorization', /Bearer v1\//)
         .end(function(err, res) {
           if (err) throw err;
@@ -340,9 +341,10 @@ describe('/authentication', function() {
 
     it('should register and redirect to the requested url', function(done) {
       supertest(service)
-        .post('/authentication/register?client_id=abc-li-12-li&redirect_uri=' +
-          'http%3A%2F%2Flocalhost%3A8011%2Fsome%2Fplace%2Fusers%3Fwith%3Dother-stuff')
+        .post('/authentication/register')
         .send({
+          client_id: 'abc-li-12-li',
+          redirect_uri: 'http://localhost:8011/some/place/users?with=other-stuff',
           username: 'test-' + Date.now(),
           password: 'aje24wersdfgs324rfe+woe'
         })

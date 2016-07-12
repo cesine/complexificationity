@@ -16,6 +16,7 @@ var router = express.Router();
  * Render UI pages
  */
 router.use('/', express.static(__dirname + '/../public/components/as-ui-auth/components'));
+router.use('/register', express.static(__dirname + '/../public/components/as-ui-auth/components/signup'));
 
 /**
  * Log in
@@ -34,19 +35,22 @@ function postLogin(req, res, next) {
       // the error handler will send cleaned json which can be displayed to the user
       return next(err, req, res, next);
     }
-    // Successful logins should send the user back to /oauth/authorize.
-    var path = req.body.redirect || 'oauth/authorize/as';
 
     var token = config.jwt.prefix + jsonwebtoken.sign(user, config.jwt.private, {
       algorithm: config.jwt.algorithm,
       expiresIn: 60
     });
     debug('token', token);
-    res.set('Set-Cookie', 'Authorization: Bearer ' + token+ '; path=/');
+    res.set('Set-Cookie', 'Authorization=Bearer ' + token + '; path=/; Secure; HttpOnly');
     res.set('Authorization', 'Bearer ' + token);
 
-    return res.redirect(util.format('/%s?client_id=%s&redirect_uri=%s', path,
-      req.query.client_id, req.query.redirect_uri));
+    var path = req.body.redirect ||
+      util.format('/%s?client_id=%s&redirect_uri=%s',
+        'oauth/authorize/as',
+        req.body.client_id,
+        req.body.redirect_uri);
+
+    return res.redirect(path);
   });
 }
 
@@ -87,10 +91,13 @@ function postRegister(req, res, next) {
       return next(err, req, res, next);
     }
     // Successful logins should send the user back to /oauth/authorize.
-    var path = req.body.redirect || 'oauth/authorize/as';
+    var path = req.body.redirect ||
+      util.format('/%s?client_id=%s&redirect_uri=%s',
+        'oauth/authorize/as',
+        req.body.client_id,
+        req.body.redirect_uri);
 
-    return res.redirect(util.format('/%s?client_id=%s&redirect_uri=%s',
-      path, req.query.client_id, req.query.redirect_uri));
+    return res.redirect(path);
   });
 }
 
