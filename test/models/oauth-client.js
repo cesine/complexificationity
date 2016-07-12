@@ -207,42 +207,34 @@ describe('oauth client model', function() {
   // https://github.com/oauthjs/node-oauth2-server/wiki/Model-specification
   describe('express-oauth-server support', function() {
     describe('tokens', function() {
-      it('should save an access token', function(done) {
-        OAuthClient.saveAccessToken(token, client, user, function(err, token) {
-          if (err) {
-            return done(err);
-          }
-
-          expect(token).not.to.be.null;
-          expect(token).deep.equal({
-            access_token: token.access_token,
-            client_id: 'test-client',
-            access_token_expires_on: token.expires,
-            refresh_token: token.refresh_token,
-            refresh_token_expires_on: token.expires,
-            user_id: user.id
+      it('should save an access token', function() {
+        return OAuthClient
+          .saveAccessToken(token, client, user)
+          .then(function(token) {
+            expect(token).not.to.be.null;
+            expect(token).deep.equal({
+              access_token: token.access_token,
+              client_id: 'test-client',
+              access_token_expires_on: token.expires,
+              refresh_token: token.refresh_token,
+              refresh_token_expires_on: token.expires,
+              user_id: user.id
+            });
           });
-
-          done();
-        });
       });
 
-      it('should get an access token', function(done) {
-        OAuthClient.getAccessToken('test-token', function(err, token) {
-          if (err) {
-            return done(err);
-          }
-
-          expect(token).not.to.be.null;
-          expect(token).deep.equal({
-            accessToken: 'test-token',
-            clientId: 'test-client',
-            expires: token.expires,
-            userId: 'test-user-efg_random_uuid'
+      it('should get an access token', function() {
+        return OAuthClient
+          .getAccessToken('test-token')
+          .then(function(token) {
+            expect(token).not.to.be.null;
+            expect(token).deep.equal({
+              accessToken: 'test-token',
+              clientId: 'test-client',
+              expires: token.expires,
+              userId: 'test-user-efg_random_uuid'
+            });
           });
-
-          done();
-        });
       });
 
       it('should get an refresh token', function(done) {

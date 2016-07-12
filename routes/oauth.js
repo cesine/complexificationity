@@ -39,8 +39,10 @@ function getAuthorize(req, res) {
  * @param  {Response} res
  * @param  {Function} next
  */
-function postAuthorize(req, res) {
+function postAuthorize(req, res, next) {
   debug('req.app.locals', req.app.locals);
+  debug(req.headers);
+  debug(req.user);
 
   // Redirect anonymous users to login page.
   if (!req.app.locals.user) {
@@ -49,10 +51,11 @@ function postAuthorize(req, res) {
       req.query.client_id, req.query.redirect_uri));
   }
 
-  // return oauth.authorize();
-  res.json({
-    'TODO': true
-  });
+   var middleware = oauth.authorize({
+    handleError: errorMiddleware
+   });
+
+   middleware(req, res, next);
 }
 
 /**

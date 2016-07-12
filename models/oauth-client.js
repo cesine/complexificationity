@@ -6,6 +6,7 @@ var Sequelize = require('sequelize');
 var Promise = require('bluebird');
 var uuid = require('node-uuid');
 
+var config = require('./../config');
 var OAuthError = require('oauth2-server/lib/errors/oauth-error');
 var OAuthToken = require('./oauth-token');
 var User = require('./user');
@@ -139,23 +140,29 @@ function init() {
 /*
  * Get access client.
  */
+var getAccessToken = function(bearerToken) {
+  return new Promise(function(resolve, reject) {
 
-var getAccessToken = function(bearerToken, callback) {
-  OAuthToken.read({
-    access_token: bearerToken
-  }, function(err, token) {
-    if (err) {
-      return callback(err);
-    }
-    if (!token) {
-      return callback(null);
+    if (bearerToken.indexOf(config.key.prefix) === 0) {
+      return reject(new OAuthError('This is a JWT token'));
     }
 
-    callback(null, {
-      accessToken: token.access_token,
-      clientId: token.client_id,
-      expires: token.access_token_expires_on,
-      userId: token.user_id
+    OAuthToken.read({
+      access_token: bearerToken
+    }, function(err, token) {
+      if (err) {
+        return reject(err);
+      }
+      if (!token) {
+        return reject(new Error('Unable to get access token, please report this'));
+      }
+
+      resolve({
+        accessToken: token.access_token,
+        clientId: token.client_id,
+        expires: token.access_token_expires_on,
+        userId: token.user_id
+      });
     });
   });
 };
@@ -228,6 +235,18 @@ var revokeAuthorizationCode = function(code) {
     resolve(true);
   });
 };
+
+var saveAuthorizationCode = function(code, value) {
+  debug('saveAuthorizationCode', arguments);
+
+  return new Promise(function(resolve) {
+    AUTHORIZATION_CODE_TRANSIENT_STORE[code] = value;
+    debug('AUTHORIZATION_CODE_TRANSIENT_STORE', AUTHORIZATION_CODE_TRANSIENT_STORE);
+
+    resolve(true);
+  });
+};
+
 /**
  * Get refresh token.
  */
@@ -276,40 +295,42 @@ var getUser = function(username, password, callback) {
  * Save token.
  */
 
-var saveAccessToken = function(token, client, user, callback) {
-  if (!token || !client || !user) {
-    return callback(new Error('Invalid Options'));
-  }
-
-  OAuthToken.create({
-    access_token: token.accessToken,
-    access_token_expires_on: token.accessTokenExpiresOn,
-    client_id: client.id,
-    refresh_token: token.refreshToken,
-    refresh_token_expires_on: token.refreshTokenExpiresOn,
-    user_id: user.id
-  }, function(err, token) {
-    if (err) {
-      return callback(err);
-    }
-    if (!token) {
-      return callback(null);
+var saveAccessToken = function(token, client, user) {
+  return new Promise(function(resolve, reject) {
+    if (!token || !client || !user) {
+      return callback(new Error('Invalid Options'));
     }
 
-    // https://github.com/oauthjs/express-oauth-server/blob/master/test/integration/index_test.js#L238
-    // {
-    //   accessToken: 'foobar',
-    //   client: {},
-    //   user: {}
-    // };
+    OAuthToken.create({
+      access_token: token.accessToken,
+      access_token_expires_on: token.accessTokenExpiresOn,
+      client_id: client.id,
+      refresh_token: token.refreshToken,
+      refresh_token_expires_on: token.refreshTokenExpiresOn,
+      user_id: user.id
+    }, function(err, token) {
+      if (err) {
+        return reject(err);
+      }
+      if (!token) {
+        return reject(new OAuthError('Unable to create token, please report this.'));
+      }
 
-    callback(null, {
-      access_token: token.access_token,
-      access_token_expires_on: token.access_token_expires_on,
-      client_id: token.client_id,
-      refresh_token: token.refresh_token,
-      refresh_token_expires_on: token.refresh_token_expires_on,
-      user_id: token.user_id
+      // https://github.com/oauthjs/express-oauth-server/blob/master/test/integration/index_test.js#L238
+      // {
+      //   accessToken: 'foobar',
+      //   client: {},
+      //   user: {}
+      // };
+
+      resolve({
+        access_token: token.access_token,
+        access_token_expires_on: token.access_token_expires_on,
+        client_id: token.client_id,
+        refresh_token: token.refresh_token,
+        refresh_token_expires_on: token.refresh_token_expires_on,
+        user_id: token.user_id
+      });
     });
   });
 };
@@ -322,6 +343,7 @@ module.exports.read = read;
 
 module.exports.getAccessToken = getAccessToken;
 module.exports.getAuthorizationCode = getAuthorizationCode;
+module.exports.saveAuthorizationCode = saveAuthorizationCode;
 module.exports.revokeAuthorizationCode = revokeAuthorizationCode;
 module.exports.getClient = getClient;
 module.exports.getRefreshToken = getRefreshToken;

@@ -30,7 +30,11 @@ function errors(err, req, res, next) {
   }
 
   res.status(data.status);
-  res.json(data);
+  if (typeof res.json === 'function'){
+    res.json(data);
+  } else if (typeof req.json === 'function'){
+    req.json(data);
+  }
 }
 
 module.exports = errors;
