@@ -2,6 +2,7 @@
   "name": "as-auth-provider",
   "version": "0.0.1",
   "description": "Example auth provider for authenticated systems workshop",
+  "repository": "https://github.com/cesine/as-auth-provider.git",
   "scripts": {
     "coverage": "istanbul cover _mocha -- --recursive test; istanbul check-coverage  --statements 90 --functions 90 --branches 77 --lines 90",
     "coveralls": "cat ./coverage/lcov.info | coveralls",
@@ -20,7 +21,7 @@
     "debug": "^2.2.0",
     "express": "^4.13.3",
     "express-handlebars": "^3.0.0",
-    "express-oauth-server": "https://github.com/oauthjs/express-oauth-server.git",
+    "express-oauth-server": "https://github.com/cesine/express-oauth-server.git",
     "jsonwebtoken": "^7.0.1",
     "morgan": "^1.6.1",
     "node-uuid": "^1.4.7",
