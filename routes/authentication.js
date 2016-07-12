@@ -37,12 +37,12 @@ function postLogin(req, res, next) {
     // Successful logins should send the user back to /oauth/authorize.
     var path = req.body.redirect || 'oauth/authorize/as';
 
-    var token = jsonwebtoken.sign(user, config.key.private, {
+    var token = config.key.prefix + jsonwebtoken.sign(user, config.key.private, {
       algorithm: config.key.algorithm,
       expiresIn: 60
     });
     debug('token', token);
-    res.set('Set-Cookie', 'Authorization: Bearer ' + token);
+    res.set('Set-Cookie', 'Authorization: Bearer ' + token+ '; path=/');
     res.set('Authorization', 'Bearer ' + token);
 
     return res.redirect(util.format('/%s?client_id=%s&redirect_uri=%s', path,

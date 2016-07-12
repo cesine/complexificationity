@@ -140,7 +140,7 @@ describe('/authenticate', function() {
         .expect(302)
         .expect('Content-Type', 'text/plain; charset=utf-8')
         .expect('Set-Cookie', /Authorization: Bearer /)
-        .expect('Authorization', /Bearer /)
+        .expect('Authorization', /Bearer v1\//)
         .end(function(err, res) {
           if (err) throw err;
 
@@ -148,7 +148,7 @@ describe('/authenticate', function() {
           expect(res.text).to.contain('to /oauth/authorize/as?client_id=abc-li-12-li' +
             '&redirect_uri=http://localhost:8011/some/place/users?with=other-stuff');
 
-          var token = res.headers.authorization.replace(/Bearer /, '');
+          var token = res.headers.authorization.replace(/Bearer v1\//, '');
           expect(token).exists;
 
           var decoded = jsonwebtoken.decode(token);

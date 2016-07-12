@@ -34,8 +34,8 @@ passport.use(new JwtStrategy(opts, function(jwtPayload, done) {
 }));
 
 function jwt(req, res, next) {
-  if (req && req.headers && req.headers.authorization && req.headers.authorization.indexOf('Bearer ') > -1) {
-    var token = req.headers.authorization.replace(/Bearer /, '');
+  if (req && req.headers && req.headers.authorization && req.headers.authorization.indexOf('Bearer ' + config.key.prefix) > -1) {
+    var token = req.headers.authorization.replace(new RegExp('Bearer ' + config.key.prefix), '');
     var decoded = jsonwebtoken.decode(token);
 
     debug('public key', config.key.public);
@@ -51,7 +51,9 @@ function jwt(req, res, next) {
       }
 
       req.app.locals.user = req.user = decoded;
-      req.app.locals.token = 'Bearer ' + token;
+      req.app.locals.token = 'Bearer ' + config.key.prefix + token;
+      // Oauth2 is trying to use this token
+      delete req.headers.authorization;
 
       res.set('Authorization', req.app.locals.token);
     } catch (err) {
