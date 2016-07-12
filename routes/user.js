@@ -1,11 +1,14 @@
 'use strict';
+
+var debug = require('debug')('routes:user');
 var express = require('express');
 var router = express.Router();
 
-var user = require('./../models/user');
+var User = require('./../models/user');
+var authenticationMiddleware = require('./../middleware/authentication');
 
 // Initialize the model to ensure the table exists
-user.init();
+User.init();
 
 /**
  * Get a user's details
@@ -18,7 +21,7 @@ function getUser(req, res, next) {
     username: req.params.username
   };
 
-  user.read(json, function(err, profile) {
+  User.read(json, function(err, profile) {
     if (err) {
       return next(err, req, res, next);
     }
@@ -33,7 +36,7 @@ function getUser(req, res, next) {
  * @param  {Function} next
  */
 function getList(req, res, next) {
-  user.list(null, function(err, miniProfiles) {
+  User.list(null, function(err, miniProfiles) {
     if (err) {
       return next(err, req, res, next);
     }
@@ -41,10 +44,39 @@ function getList(req, res, next) {
   });
 }
 
-// https://github.com/oauthjs/express-oauth-server/blob/master/index.js#L35
-router.get('/', /* oauth.authenticate(), */ getList);
-router.get('/:username', /* oauth.authenticate(), */ getUser);
+/**
+ * Update a user's details
+ * @param  {Request} req
+ * @param  {Response} res
+ * @param  {Function} next
+ */
+function putUser(req, res, next) {
+  var json = {
+    username: req.params.username
+  };
+
+  if (req.params.username !== req.body.username || req.params.username !== req.app.locals.user.username){
+    debug(req.params, req.body);
+    var err = new Error('Username does not match, you can only update your own details');
+    err.status = 403;
+
+    return next(err, req, res, next);
+  }
+
+  User.save(req.body, function(err, profile) {
+    if (err) {
+      return next(err, req, res, next);
+    }
+    res.json(profile);
+  });
+}
+
+router.get('/', getList);
+router.get('/:username', authenticationMiddleware.requireAuthentication, getUser);
+router.put('/:username', authenticationMiddleware.requireAuthentication, putUser);
 
 module.exports.getUser = getUser;
+module.exports.putUser = putUser;
+
 module.exports.getList = getList;
 module.exports.router = router;

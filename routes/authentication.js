@@ -38,7 +38,7 @@ function postLogin(req, res, next) {
 
     var token = config.jwt.prefix + jsonwebtoken.sign(user, config.jwt.private, {
       algorithm: config.jwt.algorithm,
-      expiresIn: 60
+      // expiresIn: 60 // minutes
     });
     debug('token', token);
     res.set('Set-Cookie', 'Authorization=Bearer ' + token + '; path=/; Secure; HttpOnly');

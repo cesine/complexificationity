@@ -171,7 +171,7 @@ describe('/authentication', function() {
             createdAt: decoded.createdAt,
             updatedAt: decoded.updatedAt,
             iat: decoded.iat,
-            exp: decoded.exp
+            // exp: decoded.exp
           });
 
           var verified = jsonwebtoken.verify(token, config.jwt.public, {

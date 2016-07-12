@@ -34,8 +34,21 @@ passport.use(new JwtStrategy(opts, function(jwtPayload, done) {
 }));
 
 function jwt(req, res, next) {
+  var tokenString;
   if (req && req.headers && req.headers.authorization && req.headers.authorization.indexOf('Bearer ' + config.jwt.prefix) > -1) {
-    var token = req.headers.authorization.replace(new RegExp('Bearer ' + config.jwt.prefix), '');
+    tokenString = req.headers.authorization;
+    debug('used header', req.headers.authorization);
+  } else if (req && req.headers && req.headers.cookie && req.headers.cookie.indexOf('Authorization=Bearer ' + config.jwt.prefix) > -1) {
+    debug(req.headers.cookie);
+    tokenString = req.headers.cookie.split(';').filter(function(cookie) {
+      return cookie.indexOf('Authorization') > -1;
+    }).map(function(cookie) {
+      return cookie.replace('Authorization=', '').trim();
+    }).join('');
+    debug('used cookie', req.headers.cookie);
+  }
+  if (tokenString) {
+    var token = tokenString.replace(new RegExp('Bearer ' + config.jwt.prefix), '');
     var decoded = jsonwebtoken.decode(token);
 
     debug('public key', config.jwt.public);
@@ -68,6 +81,16 @@ function jwt(req, res, next) {
 }
 
 function requireAuthentication(req, res, next) {
+  if (!req.app.locals.user) {
+    var err = new Error('You must login to access this data');
+    err.status = 403;
+    return next(err, req, res, next);
+  }
+
+  next();
+}
+
+function requireAuthenticationPassportJWT(req, res, next) {
   debug('requireAuthentication', req.user);
   debug('requireAuthentication', req.app.locals);
   debug('requireAuthentication', req.headers);
@@ -82,6 +105,6 @@ function requireAuthentication(req, res, next) {
 }
 
 module.exports.jwt = jwt;
-https: //github.com/themikenicholson/passport-jwt/blob/master/test/extrators-test.js#L8
-  module.exports.extractor = opts.jwtFromRequest;
+// https: //github.com/themikenicholson/passport-jwt/blob/master/test/extrators-test.js#L8
+module.exports.extractor = opts.jwtFromRequest;
 module.exports.requireAuthentication = requireAuthentication;
