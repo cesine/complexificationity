@@ -37,8 +37,8 @@ function postLogin(req, res, next) {
     // Successful logins should send the user back to /oauth/authorize.
     var path = req.body.redirect || 'oauth/authorize/as';
 
-    var token = config.key.prefix + jsonwebtoken.sign(user, config.key.private, {
-      algorithm: config.key.algorithm,
+    var token = config.jwt.prefix + jsonwebtoken.sign(user, config.jwt.private, {
+      algorithm: config.jwt.algorithm,
       expiresIn: 60
     });
     debug('token', token);

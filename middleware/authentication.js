@@ -10,7 +10,7 @@ var user = require('./../models/user');
 
 var opts = {
   jwtFromRequest: ExtractJwt.fromAuthHeader(),
-  secretOrKey: config.key.private,
+  secretOrKey: config.jwt.private,
   issuer: config.url,
   audience: 'anythings.net'
 };
@@ -34,14 +34,14 @@ passport.use(new JwtStrategy(opts, function(jwtPayload, done) {
 }));
 
 function jwt(req, res, next) {
-  if (req && req.headers && req.headers.authorization && req.headers.authorization.indexOf('Bearer ' + config.key.prefix) > -1) {
-    var token = req.headers.authorization.replace(new RegExp('Bearer ' + config.key.prefix), '');
+  if (req && req.headers && req.headers.authorization && req.headers.authorization.indexOf('Bearer ' + config.jwt.prefix) > -1) {
+    var token = req.headers.authorization.replace(new RegExp('Bearer ' + config.jwt.prefix), '');
     var decoded = jsonwebtoken.decode(token);
 
-    debug('public key', config.key.public);
+    debug('public key', config.jwt.public);
     try {
-      var verified = jsonwebtoken.verify(token, config.key.public, {
-        algorithm: config.key.algorithm
+      var verified = jsonwebtoken.verify(token, config.jwt.public, {
+        algorithm: config.jwt.algorithm
       });
 
       if (verified.expiration && verified.expiration < Date.now()) {
@@ -51,7 +51,7 @@ function jwt(req, res, next) {
       }
 
       req.app.locals.user = req.user = decoded;
-      req.app.locals.token = 'Bearer ' + config.key.prefix + token;
+      req.app.locals.token = 'Bearer ' + config.jwt.prefix + token;
       // Oauth2 is trying to use this token
       delete req.headers.authorization;
 

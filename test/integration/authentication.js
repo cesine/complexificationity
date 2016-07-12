@@ -173,8 +173,8 @@ describe('/authenticate', function() {
             exp: decoded.exp
           });
 
-          var verified = jsonwebtoken.verify(token, config.key.public, {
-            algorithm: config.key.algorithm
+          var verified = jsonwebtoken.verify(token, config.jwt.public, {
+            algorithm: config.jwt.algorithm
           });
           expect(verified).to.deep.equal(decoded);
 

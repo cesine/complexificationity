@@ -143,7 +143,7 @@ function init() {
 var getAccessToken = function(bearerToken) {
   return new Promise(function(resolve, reject) {
 
-    if (bearerToken.indexOf(config.key.prefix) === 0) {
+    if (bearerToken.indexOf(config.jwt.prefix) === 0) {
       return reject(new OAuthError('This is a JWT token'));
     }
 
