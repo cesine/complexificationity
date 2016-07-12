@@ -48,7 +48,7 @@ service.use(authenticationMiddleware.jwt);
 /**
  * Routes
  */
-service.use('/authenticate', authenticationRoutes);
+service.use('/authentication', authenticationRoutes);
 service.use('/oauth', oauthRoutes);
 service.use('/v1/users', userRoutes);
 service.use('/', routes);

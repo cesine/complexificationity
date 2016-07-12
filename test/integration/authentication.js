@@ -8,7 +8,7 @@ var config = require('./../../config');
 var service = require('./../../');
 var User = require('./../../models/user');
 
-describe('/authenticate', function() {
+describe('/authentication', function() {
   before(function(done) {
     User.init();
 
@@ -21,10 +21,10 @@ describe('/authenticate', function() {
     });
   });
 
-  describe('GET /authenticate/login', function() {
+  describe('GET /authentication/login', function() {
     it('should display', function(done) {
       supertest(service)
-        .get('/authenticate/login/')
+        .get('/authentication/login/')
         .expect(200)
         .expect('Content-Type', 'text/html; charset=UTF-8')
         .end(function(err, res) {
@@ -40,13 +40,13 @@ describe('/authenticate', function() {
 
     it('should serve client side files', function(done) {
       supertest(service)
-        .get('/authenticate/login/login.js')
+        .get('/authentication/login/login.js')
         .expect(200)
         .expect('Content-Type', 'application/javascript')
         .end(function(err, res) {
           if (err) throw err;
 
-          expect(res.text).equal('');
+          expect(res.text).to.contain('login');
 
           done();
         });
@@ -54,7 +54,7 @@ describe('/authenticate', function() {
 
     it('should redirect to login/', function(done) {
       supertest(service)
-        .get('/authenticate/login?anything=query_should_be_kept')
+        .get('/authentication/login?anything=query_should_be_kept')
         .expect(303)
         .expect('Content-Type', 'text/html; charset=UTF-8')
         .end(function(err, res) {
@@ -68,10 +68,10 @@ describe('/authenticate', function() {
     });
   });
 
-  describe('POST /authenticate/login', function() {
+  describe('POST /authentication/login', function() {
     it('should require a body', function(done) {
       supertest(service)
-        .post('/authenticate/login')
+        .post('/authentication/login')
         .expect(403)
         .expect('Content-Type', 'application/json; charset=utf-8')
         .end(function(err, res) {
@@ -89,7 +89,7 @@ describe('/authenticate', function() {
 
     it('should require a username', function(done) {
       supertest(service)
-        .post('/authenticate/login')
+        .post('/authentication/login')
         .send({
           password: 'aje24wersdfgs324rfe+woe'
         })
@@ -110,7 +110,7 @@ describe('/authenticate', function() {
 
     it('should require a password', function(done) {
       supertest(service)
-        .post('/authenticate/login')
+        .post('/authentication/login')
         .send({
           username: 'test-user',
         })
@@ -131,7 +131,7 @@ describe('/authenticate', function() {
 
     it('should login and redirect to the requested url', function(done) {
       supertest(service)
-        .post('/authenticate/login?client_id=abc-li-12-li&' +
+        .post('/authentication/login?client_id=abc-li-12-li&' +
           'redirect_uri=http%3A%2F%2Flocalhost%3A8011%2Fsome%2Fplace%2Fusers%3Fwith%3Dother-stuff')
         .send({
           username: 'test-user',
@@ -183,10 +183,10 @@ describe('/authenticate', function() {
     });
   });
 
-  describe('GET /authenticate/signup', function() {
+  describe('GET /authentication/signup', function() {
     it('should display', function(done) {
       supertest(service)
-        .get('/authenticate/signup/')
+        .get('/authentication/signup/')
         .expect(200)
         .expect('Content-Type', 'text/html; charset=UTF-8')
         .end(function(err, res) {
@@ -202,13 +202,13 @@ describe('/authenticate', function() {
 
     it('should serve client side files', function(done) {
       supertest(service)
-        .get('/authenticate/signup/signup.js')
+        .get('/authentication/signup/signup.js')
         .expect(200)
         .expect('Content-Type', 'application/javascript')
         .end(function(err, res) {
           if (err) throw err;
 
-          expect(res.text).equal('');
+          expect(res.text).to.contain('signup');
 
           done();
         });
@@ -216,7 +216,7 @@ describe('/authenticate', function() {
 
     it('should redirect to signup/', function(done) {
       supertest(service)
-        .get('/authenticate/signup?anything=query_should_be_kept')
+        .get('/authentication/signup?anything=query_should_be_kept')
         .expect(303)
         .expect('Content-Type', 'text/html; charset=UTF-8')
         .end(function(err, res) {
@@ -230,10 +230,10 @@ describe('/authenticate', function() {
     });
   });
 
-  describe('POST /authenticate/register', function() {
+  describe('POST /authentication/register', function() {
     it('should require a body', function(done) {
       supertest(service)
-        .post('/authenticate/register')
+        .post('/authentication/register')
         .expect(403)
         .expect('Content-Type', 'application/json; charset=utf-8')
         .end(function(err, res) {
@@ -252,7 +252,7 @@ describe('/authenticate', function() {
 
     it('should require a username', function(done) {
       supertest(service)
-        .post('/authenticate/register')
+        .post('/authentication/register')
         .send({
           password: 'aje24wersdfgs324rfe+woe'
         })
@@ -274,7 +274,7 @@ describe('/authenticate', function() {
 
     it('should require a password', function(done) {
       supertest(service)
-        .post('/authenticate/register')
+        .post('/authentication/register')
         .send({
           username: 'test-user',
         })
@@ -295,7 +295,7 @@ describe('/authenticate', function() {
 
     it('should require non-trivial password', function(done) {
       supertest(service)
-        .post('/authenticate/register')
+        .post('/authentication/register')
         .send({
           username: 'test-user',
           password: 'test'
@@ -317,7 +317,7 @@ describe('/authenticate', function() {
 
     it('should not register an existing username', function(done) {
       supertest(service)
-        .post('/authenticate/register?client_id=abc-li-12-li&' +
+        .post('/authentication/register?client_id=abc-li-12-li&' +
           'redirect_uri=http%3A%2F%2Flocalhost%3A8011%2Fsome%2Fplace%2Fusers%3Fwith%3Dother-stuff')
         .send({
           username: 'test-user',
@@ -340,7 +340,7 @@ describe('/authenticate', function() {
 
     it('should register and redirect to the requested url', function(done) {
       supertest(service)
-        .post('/authenticate/register?client_id=abc-li-12-li&redirect_uri=' +
+        .post('/authentication/register?client_id=abc-li-12-li&redirect_uri=' +
           'http%3A%2F%2Flocalhost%3A8011%2Fsome%2Fplace%2Fusers%3Fwith%3Dother-stuff')
         .send({
           username: 'test-' + Date.now(),

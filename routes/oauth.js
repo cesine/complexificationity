@@ -47,7 +47,7 @@ function postAuthorize(req, res, next) {
   // Redirect anonymous users to login page.
   if (!req.app.locals.user) {
     debug(req.query, req.params);
-    return res.redirect(util.format('/login?client_id=%s&redirect_uri=%s',
+    return res.redirect(util.format('/authentication/login?client_id=%s&redirect_uri=%s',
       req.query.client_id, req.query.redirect_uri));
   }
 
@@ -68,7 +68,7 @@ function postAuthorize(req, res, next) {
 function getToken(req, res) {
   // Redirect anonymous users to login page.
   if (!req.app.locals.user) {
-    return res.redirect(util.format('/login?client_id=%s&redirect_uri=%s',
+    return res.redirect(util.format('/authentication/login?client_id=%s&redirect_uri=%s',
       req.query.client_id, req.query.redirect_uri));
   }
 
@@ -97,6 +97,7 @@ function postToken(req, res, next) {
 // Invalid argument: `response` must be an instance of Response
 // service.use(service.oauth.authenticate());
 
+router.get('/authorize/as', getAuthorize);
 router.get('/authorize', getAuthorize);
 router.post('/authorize', postAuthorize);
 
