@@ -57,12 +57,6 @@ function jwt(req, res, next) {
         algorithm: config.jwt.algorithm
       });
 
-      if (verified.expiration && verified.expiration < Date.now()) {
-        var err = new Error('Authorization has expired');
-        err.satus = 403;
-        return next(err, req, res, next);
-      }
-
       req.app.locals.user = req.user = decoded;
       req.app.locals.token = 'Bearer ' + config.jwt.prefix + token;
       // Oauth2 is trying to use this token
@@ -70,6 +64,8 @@ function jwt(req, res, next) {
 
       res.set('Authorization', req.app.locals.token);
     } catch (err) {
+      // Often this is because it has expired or it was mutated
+      debug(err);
       err.status = 403;
       return next(err, req, res, next);
     }
