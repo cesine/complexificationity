@@ -97,6 +97,16 @@ function postRegister(req, res, next) {
         req.body.client_id,
         req.body.redirect_uri);
 
+
+    var token = config.jwt.prefix + jsonwebtoken.sign(user, config.jwt.private, {
+      algorithm: config.jwt.algorithm,
+      // expiresIn: 60 // minutes
+    });
+    debug('token', token);
+    res.set('Set-Cookie', 'Authorization=Bearer ' + token + '; path=/; Secure; HttpOnly');
+    res.set('Authorization', 'Bearer ' + token);
+
+
     return res.redirect(path);
   });
 }
