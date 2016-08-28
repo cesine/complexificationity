@@ -1,6 +1,6 @@
 {
-  "name": "as-auth-provider",
-  "description": "Example auth provider for authenticated systems workshop",
+  "name": "",
+  "description": "",
   "version": "0.0.1",
   "ignore": [
     "**/.*",
@@ -8,6 +8,5 @@
     "components"
   ],
   "dependencies": {
-    "as-ui-auth": "https://github.com/cesine/as-ui-auth.git"
   }
 }

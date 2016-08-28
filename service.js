@@ -1,17 +1,13 @@
 'use strict';
 
 var bodyParser = require('body-parser');
-var cors = require('cors');
 var debug = require('debug')('service');
 var express = require('express');
-var logger = require('morgan');
+var morgan = require('morgan');
 
-var authenticationRoutes = require('./routes/authentication').router;
-var oauthRoutes = require('./routes/oauth').router;
-var authenticationMiddleware = require('./middleware/authentication');
 var errorsMiddleware = require('./middleware/error');
 var routes = require('./routes/index').router;
-var userRoutes = require('./routes/user').router;
+var codebaseRoutes = require('./routes/codebase').router;
 
 var service = express();
 
@@ -21,7 +17,7 @@ service.locals.ENV_DEVELOPMENT = env === 'development';
 /**
  * Config
  */
-service.use(logger(env));
+service.use(morgan('combined'));
 
 /**
  * Body parsers
@@ -32,25 +28,13 @@ service.use(bodyParser.urlencoded({
 }));
 
 /**
- * Cross Origin Resource Sharing
- * (permits client sides which are not hosted on the same domain)
- */
-service.use(cors());
-
-/**
  * Middleware
  */
-// The example attaches it to the express
-// https://github.com/oauthjs/express-oauth-server#quick-start
-// service.oauth = oauthMiddleware;
-service.use(authenticationMiddleware.jwt);
 
 /**
  * Routes
  */
-service.use('/authentication', authenticationRoutes);
-service.use('/oauth', oauthRoutes);
-service.use('/v1/users', userRoutes);
+service.use('/v1/codebases', codebaseRoutes);
 service.use('/', routes);
 
 /**
