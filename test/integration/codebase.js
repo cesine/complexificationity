@@ -11,15 +11,18 @@ describe('/v1/codebases', function() {
   before(function() {
     return Promise.all([
       new CodeBase({
-        id: 'test-integration1',
+        id: 'test/integration1',
+        complexificationity: 0.6739451919245738
       }).save(),
       new CodeBase({
-        id: 'test-integration2',
+        id: 'test/integration2',
+        "complexificationity": 0.9609969120528077
       }).save(),
       new CodeBase({
-        id: 'test-integration3',
+        id: 'test/integration3',
+        complexificationity: 0.18303309365731346
       }).save()
-    ]).catch(function(err){
+    ]).catch(function(err) {
       expect(err.statusCode).to.equal(409);
     });
   });
@@ -34,8 +37,26 @@ describe('/v1/codebases', function() {
           return done(err);
         }
 
-        expect(res.body.length).to.equal(3);
+        console.log(res.body)
+        expect(res.body).to.include.keys([
+          'total_rows',
+          'offset',
+          'rows'
+        ]);
 
+        expect(res.body.rows[0]).to.include.keys([
+          'id',
+          'key',
+          'value'
+        ]);
+
+        expect(res.body.rows[0].value).to.include.keys([
+          'title',
+          'description',
+          'gravatar',
+          'language',
+          'complexificationity'
+        ]);
         done();
       });
   });
@@ -50,7 +71,7 @@ describe('/v1/codebases', function() {
           return done(err);
         }
 
-        expect(res.body.id).to.equal('test-integration1');
+        expect(res.body.id).to.equal('test/integration1');
         expect(res.body).to.include.keys([
           'fieldDBtype',
           'id',
@@ -58,6 +79,26 @@ describe('/v1/codebases', function() {
           'api',
           'team'
         ]);
+
+        done();
+      });
+  });
+
+  it('should verify identifier', function(done) {
+    supertest(api)
+      .get('/v1/codebases/notagithubslug')
+      .expect('Content-Type', 'application/json; charset=utf-8')
+      .expect(400)
+      .end(function(err, res) {
+        if (err) {
+          return done(err);
+        }
+
+        expect(res.body).to.deep.equal({
+          message: 'Invalid GitHub slug should be format owner/repo',
+          error: {},
+          status: 400
+        });
 
         done();
       });

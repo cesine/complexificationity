@@ -16,8 +16,14 @@ var CodeBases = require('./../models/codebases').CodeBases;
 function getCodeBase(req, res, next) {
   debug('looking up ', req.params.identifier);
 
+  if (req.params.identifier.indexOf('/') === -1) {
+    var err = new Error('Invalid GitHub slug should be format owner/repo');
+    err.status = 400;
+    return next(err);
+  }
+
   var codebase = new CodeBase({
-    id: req.params.identifier.replace(/\//g, '-')
+    id: req.params.identifier
   });
 
   codebase

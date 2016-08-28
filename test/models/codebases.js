@@ -6,7 +6,7 @@ var nock = require('nock');
 var fixtures = require('../fixtures/codebases.json');
 var CodeBases = require('../../models/codebases').CodeBases;
 
-describe.only('codebases', function() {
+describe('codebases', function() {
   before(function() {
     nock.disableNetConnect();
   });
