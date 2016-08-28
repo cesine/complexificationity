@@ -88,8 +88,9 @@ function putCodeBase(req, res, next) {
     .fetch()
     .then(function() {
       // TODO re-calculate complexity
+      req.app.locals.codebase.complexificationity = Math.random();
 
-      codebase
+      req.app.locals.codebase
         .save()
         .then(function() {
           res.json(req.app.locals.codebase.toJSON());
