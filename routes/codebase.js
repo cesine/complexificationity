@@ -66,6 +66,9 @@ function getList(req, res, next) {
  * @param  {Function} next
  */
 function postCodeBase(req, res, next) {
+  // TODO calculate complexity
+  req.app.locals.codebase.complexificationity = Math.random();
+
   req.app.locals.codebase
     .save()
     .then(function() {
