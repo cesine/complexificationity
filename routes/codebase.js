@@ -8,12 +8,12 @@ var CodeBase = require('./../models/codebase').CodeBase;
 var CodeBases = require('./../models/codebases').CodeBases;
 
 /**
- * Get a codebase's details
+ * Ensure the identifier is a plausible github slug
  * @param  {Request} req
  * @param  {Response} res
  * @param  {Function} next
  */
-function getCodeBase(req, res, next) {
+function validateIdentifier(req, res, next) {
   debug('looking up ', req.params.identifier);
 
   if (req.params.identifier.indexOf('/') === -1) {
@@ -22,14 +22,25 @@ function getCodeBase(req, res, next) {
     return next(err);
   }
 
-  var codebase = new CodeBase({
+  req.app.locals.codebase = new CodeBase({
     id: req.params.identifier
   });
+  debug('added codebase to req ', req.app.locals);
 
-  codebase
+  next();
+}
+
+/**
+ * Get a codebase's details
+ * @param  {Request} req
+ * @param  {Response} res
+ * @param  {Function} next
+ */
+function getCodeBase(req, res, next) {
+  req.app.locals.codebase
     .fetch()
     .then(function() {
-      res.json(codebase.toJSON());
+      res.json(req.app.locals.codebase.toJSON());
     })
     .catch(next);
 }
@@ -55,11 +66,12 @@ function getList(req, res, next) {
  * @param  {Function} next
  */
 function postCodeBase(req, res, next) {
-  var json = {
-    identifier: req.params.identifier
-  };
-
-  res.json(json);
+  req.app.locals.codebase
+    .save()
+    .then(function() {
+      res.json(req.app.locals.codebase.toJSON());
+    })
+    .catch(next);
 }
 
 /**
@@ -69,17 +81,25 @@ function postCodeBase(req, res, next) {
  * @param  {Function} next
  */
 function putCodeBase(req, res, next) {
-  var json = {
-    identifier: req.params.identifier
-  };
+  req.app.locals.codebase
+    .fetch()
+    .then(function() {
+      // TODO re-calculate complexity
 
-  res.json(json);
+      codebase
+        .save()
+        .then(function() {
+          res.json(req.app.locals.codebase.toJSON());
+        })
+        .catch(next);
+    })
+    .catch(next);
 }
 
 router.get('/', getList);
-router.get('/:identifier', getCodeBase);
-router.post('/:identifier', postCodeBase);
-router.put('/:identifier', putCodeBase);
+router.get('/:identifier', validateIdentifier, getCodeBase);
+router.post('/:identifier', validateIdentifier, postCodeBase);
+router.put('/:identifier', validateIdentifier, putCodeBase);
 
 module.exports.getCodeBase = getCodeBase;
 module.exports.postCodeBase = postCodeBase;
