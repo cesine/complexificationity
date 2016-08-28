@@ -5,6 +5,7 @@ var express = require('express');
 var router = express.Router();
 
 var CodeBase = require('./../models/codebase').CodeBase;
+var CodeBases = require('./../models/codebases').CodeBases;
 
 /**
  * Get a codebase's details
@@ -34,7 +35,11 @@ function getCodeBase(req, res, next) {
  * @param  {Function} next
  */
 function getList(req, res, next) {
-  res.json([]);
+  CodeBases.list()
+    .then(function(list) {
+      res.json(list);
+    })
+    .catch(next);
 }
 
 /**
