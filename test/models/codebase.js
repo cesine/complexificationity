@@ -117,18 +117,4 @@ describe('codebase model', function() {
       });
     });
   });
-
-  describe('collection', function() {
-    beforeEach(function() {
-
-    });
-
-    it('should list a public view of all codebases', function() {
-
-    });
-
-    it('should return empty lists', function() {
-
-    });
-  });
 });
