@@ -13,11 +13,7 @@ var CodeBase = require('./../models/codebase').CodeBase;
  * @param  {Function} next
  */
 function getCodeBase(req, res, next) {
-  var json = {
-    identifier: req.params.identifier
-  };
-
-  console.log('looking up ', req.params.identifier);
+  debug('looking up ', req.params.identifier);
 
   var codebase = new CodeBase({
     id: req.params.identifier.replace(/\//g, '-')

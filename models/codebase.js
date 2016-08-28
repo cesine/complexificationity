@@ -1,3 +1,6 @@
+'use strict';
+/* globals Promise */
+
 var Corpus = require('ilanguage/js/corpus/Corpus').Corpus;
 var config = require('../config');
 var nano = require('nano')(config.db.url);
