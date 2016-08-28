@@ -4,7 +4,7 @@ var debug = require('debug')('routes:codebase');
 var express = require('express');
 var router = express.Router();
 
-var CodeBase = require('./../models/codebase');
+var CodeBase = require('./../models/codebase').CodeBase;
 
 /**
  * Get a codebase's details
@@ -17,7 +17,18 @@ function getCodeBase(req, res, next) {
     identifier: req.params.identifier
   };
 
-  res.json(json);
+  console.log('looking up ', req.params.identifier);
+
+  var codebase = new CodeBase({
+    id: req.params.identifier.replace(/\//g, '-')
+  });
+
+  codebase
+    .fetch()
+    .then(function() {
+      res.json(codebase.toJSON());
+    })
+    .catch(next);
 }
 
 /**
