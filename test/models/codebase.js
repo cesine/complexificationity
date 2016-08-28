@@ -117,4 +117,48 @@ describe('codebase model', function() {
       });
     });
   });
+
+  describe.only('complexificationity', function() {
+    it('should be able to import from a git repo', function() {
+      this.timeout(10 * 1000);
+      var codebase = new CodeBase({
+        id: 'test/123'
+      });
+      expect(codebase.id).to.equal('test/123');
+
+      return codebase.import()
+        .then(function(result) {
+          expect(result).to.equal(codebase);
+
+          expect(codebase.importer.fileList).to.deep.equal([
+            'imported_corpora/express/lib/middleware/init.js',
+            'imported_corpora/express/lib/middleware/query.js'
+          ]);
+
+          expect(codebase.importer.fileTree).to.deep.equal({
+            path: 'imported_corpora/express/lib/middleware',
+            name: 'middleware',
+            children: codebase.importer.fileTree.children,
+            size: codebase.importer.fileTree.size
+          });
+
+          expect(codebase.importer.fileExtensions).to.deep.equal(['.js', '.json']);
+
+          expect(codebase.importer.importOptions).to.deep.equal({
+            dryRun: true,
+            fromPreprocessedFile: true
+          });
+
+          expect(codebase.importer.session.goal).to.equal('Import from git repo');
+
+          console.log('codebase.importer.datalist.length', codebase.importer.datalist.length);
+          expect(codebase.importer.datalist.title).to.include('Files of');
+          expect(codebase.importer.datalist.title).to.include(codebase.id);
+
+          expect(codebase.importer.datalist.length).to.not.equal(0);
+          expect(codebase.importer.datalist.length).to.equal(
+            codebase.importer.fileList.length);
+        });
+    });
+  });
 });
