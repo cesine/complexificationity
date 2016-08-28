@@ -7,14 +7,14 @@ var CodeBase = require('./../../models/codebase').CodeBase;
 describe('codebase model', function() {
   describe('construction', function() {
     var codebase = new CodeBase({
-      id: 'abc-123'
+      id: 'test/123'
     });
-    expect(codebase.id).to.equal('abc-123');
+    expect(codebase.id).to.equal('test/123');
   });
 
   describe('serialization', function() {
     var codebase = new CodeBase({
-      id: 'abc-123'
+      id: 'test/123'
     });
 
     var json = codebase.toJSON();
@@ -29,7 +29,7 @@ describe('codebase model', function() {
 
   describe('persistance', function() {
     var codebase;
-    var testingId = 'test' + Date.now();
+    var testingId = 'test/' + Date.now();
 
     before(function() {
       codebase = new CodeBase({
@@ -56,14 +56,14 @@ describe('codebase model', function() {
 
     it('should return not found', function() {
       var codebase = new CodeBase({
-        id: 'abc-notfound',
+        id: 'test/notfound',
         // debugMode: true
       });
 
       return codebase.fetch().catch(function(err) {
         expect(err.statusCode).to.equal(404);
 
-        expect(codebase.id).to.equal('abc-notfound');
+        expect(codebase.id).to.equal('test/notfound');
         expect(codebase.rev).to.equal('');
 
         var json = codebase.toJSON();
