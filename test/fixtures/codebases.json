@@ -1,0 +1,35 @@
+{
+  "total_rows": 3,
+  "offset": 0,
+  "rows": [{
+    "id": "test/integration1",
+    "key": "test/integration1",
+    "value": {
+      "title": "",
+      "description": "",
+      "gravatar": "",
+      "language": "",
+      "complexificationity": 0.67394519192457380541
+    }
+  }, {
+    "id": "test/integration2",
+    "key": "test/integration2",
+    "value": {
+      "title": "",
+      "description": "",
+      "gravatar": "",
+      "language": "",
+      "complexificationity": 0.96099691205280768358
+    }
+  }, {
+    "id": "test/integration3",
+    "key": "test/integration3",
+    "value": {
+      "title": "",
+      "description": "",
+      "gravatar": "",
+      "language": "",
+      "complexificationity": 0.18303309365731346148
+    }
+  }]
+}

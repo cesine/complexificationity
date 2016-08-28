@@ -1,10 +1,16 @@
 'use strict';
 
+var config = require('../../config');
 var expect = require('chai').expect;
-
-var CodeBases = require('./../../models/codebases').CodeBases;
+var nock = require('nock');
+var fixtures = require('../fixtures/codebases.json');
+var CodeBases = require('../../models/codebases').CodeBases;
 
 describe.only('codebases', function() {
+  before(function() {
+    nock.disableNetConnect();
+  });
+
   beforeEach(function() {
     CodeBases._list = null;
     CodeBases._listTTL = 500;
@@ -22,17 +28,31 @@ describe.only('codebases', function() {
   });
 
   it('should cache the list', function() {
-    CodeBases._list = [{}, {}, {}];
+    var couchdb = nock(config.db.url)
+      .get('/' + config.db.database + '/_design/codebases/_view/public')
+      .reply(200, fixtures);
+
+    CodeBases._list = {
+      rows: [{}, {}]
+    };
     CodeBases._listExpires = Date.now() + 1000;
 
     return CodeBases.list().then(function(list) {
-      expect(list.length).to.equal(3);
+      expect(list.rows.length).to.equal(2);
+
+      expect(couchdb.isDone()).to.be.false;
+      nock.cleanAll();
     });
   });
 
   it('should list a public view of all codebases', function() {
+    var couchdb = nock(config.db.url)
+      .get('/' + config.db.database + '/_design/codebases/_view/public')
+      .reply(200, fixtures);
+
     return CodeBases.list().then(function(list) {
-      expect(list.length).to.equal(0);
+      expect(list.rows.length).to.equal(3);
+      expect(couchdb.isDone()).to.be.true;
     });
   });
 });

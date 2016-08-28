@@ -22,7 +22,17 @@ var CodeBases = {
       }
 
       debug('fetching the list', self._listExpires, Date.now());
-      resolve([]);
+
+      db.view('codebases', 'public', function(err, body) {
+        if (err) {
+          debug('err', err.statusCode, JSON.stringify(err));
+          return reject(err);
+        }
+
+        self._list = body;
+
+        resolve(body);
+      });
     });
   }
 };
