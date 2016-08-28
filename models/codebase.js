@@ -34,15 +34,15 @@ CodeBase.prototype = Object.create(Corpus.prototype, /** @lends CodeBase.prototy
       var self = this;
 
       return new Promise(function(resolve, reject) {
+        if (self.rev) {
+          self._rev = self.rev;
+        } else {
+          self.dateCreated = Date.now();
+        }
+        self.dateModified = Date.now();
+
         var json = self.toJSON();
         json._id = self.id;
-
-        if (self.rev) {
-          json._rev = self.rev;
-        } else {
-          json.dateCreated = Date.now();
-        }
-        json.dateModified = Date.now();
 
         self.debug('saving', json);
         db.insert(json, function(err, body) {
