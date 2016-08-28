@@ -2,7 +2,7 @@
 /* globals Promise */
 
 var config = require('../config');
-var debug = require('debug')('model:codebase');
+var debug = require('debug')('model:codebases');
 var nano = require('nano')(config.db.url);
 
 var db = nano.db.use(config.db.database);
