@@ -9,7 +9,7 @@ function errors(err, req, res, next) {
 
   debug(err.stack);
 
-  if (process.env.NODE_ENV === 'development') {
+  if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
     // expose stack traces
     data = {
       message: err.message,
