@@ -127,25 +127,28 @@ describe('codebase model', function() {
 
     before('should be able to import from a git repo', function() {
       codebase = new CodeBase({
-        id: 'expressjs/express'
+        id: 'expressjs/errorhandler',
+        url: 'https://github.com/expressjs/errorhandler.git'
       });
     });
 
     it('should import from git', function() {
       this.timeout(10 * 1000);
+      codebase.debugMode = true;
 
       return codebase.import()
         .then(function(result) {
           expect(result).to.equal(codebase);
 
           expect(codebase.importer.fileList).to.deep.equal([
-            'imported_corpora/express/lib/middleware/init.js',
-            'imported_corpora/express/lib/middleware/query.js'
+            'imported_corpora/expressjs/errorhandler/index.js',
+            'imported_corpora/expressjs/errorhandler/package.json',
+            'imported_corpora/expressjs/errorhandler/test/test.js'
           ]);
 
           expect(codebase.importer.fileTree).to.deep.equal({
-            path: 'imported_corpora/express/lib/middleware',
-            name: 'middleware',
+            path: 'imported_corpora/expressjs/errorhandler',
+            name: 'errorhandler',
             children: codebase.importer.fileTree.children,
             size: codebase.importer.fileTree.size
           });
@@ -162,14 +165,15 @@ describe('codebase model', function() {
           expect(codebase.importer.datalist.title).to.include('Files of');
           expect(codebase.importer.datalist.title).to.include(codebase.id);
 
-          expect(codebase.importer.datalist.length).to.equal(2);
+          expect(codebase.importer.datalist.length).to.equal(3);
           expect(codebase.importer.datalist.length).to.equal(
             codebase.importer.fileList.length);
 
-          expect(codebase.importer.datalist.docs
-            .collection['query.js']).to.be.defined;
-          expect(codebase.importer.datalist.docs
-            .collection['init.js']).to.be.defined;
+          console.log('codebase.importer.datalist.docs', codebase.importer.datalist.docs);
+          expect(codebase.importer.datalist.docs['imported_corpora/expressjs/errorhandler/index.js'].fieldDBtype)
+            .to.equal('ComputationalLinguisticsDatum');
+          expect(codebase.importer.datalist.docs['imported_corpora/expressjs/errorhandler/package.json'].fieldDBtype)
+            .to.equal('ComputationalLinguisticsDatum');
         });
     });
 

@@ -86,6 +86,15 @@ CodeBase.prototype = Object.create(Corpus.prototype, /** @lends CodeBase.prototy
     }
   },
 
+  url: {
+    get: function() {
+      return this._url;
+    },
+    set: function(value) {
+      this._url = value;
+    }
+  },
+
   import: {
     value: function() {
       var self = this;
@@ -97,12 +106,16 @@ CodeBase.prototype = Object.create(Corpus.prototype, /** @lends CodeBase.prototy
       }
 
       this.whenCloned = new Promise(function(resolve, reject) {
+        if (!self.url) {
+          throw new Error('Cannot import, url is not defined');
+        }
+
         var options = {
-          remoteUri: 'https://github.com/expressjs/express.git',
+          remoteUri: self.url,
           readOptions: {
             readFileFunction: CodeBase._readFile
           },
-          fileExtensions: ['.js', '.json'],
+          fileExtensions: self.fileExtensions || ['.js', '.json'],
           preprocessOptions: {
             preprocessFunction: CodeBase._preprocessDatum,
             writePreprocessedFileFunction: CodeBase._writePreprocessedDatum,
@@ -121,10 +134,6 @@ CodeBase.prototype = Object.create(Corpus.prototype, /** @lends CodeBase.prototy
         self.importer.clone(options)
           .then(function(result) {
             self.importer.debug('result of clone', result.cloneMessage);
-
-            // run a subset
-            result.dbname = 'express/lib/middleware';
-
             return self.importer.findFiles(options);
           }, reject)
           .then(function(result) {
@@ -177,6 +186,10 @@ CodeBase.prototype = Object.create(Corpus.prototype, /** @lends CodeBase.prototy
         dot: dot,
         uppercase: uppercase
       };
+
+      // TODO placeholder
+      this.complexificationity = Math.random();
+
       return this.stats;
     }
   },
