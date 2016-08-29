@@ -122,7 +122,7 @@ describe('codebase model', function() {
     });
   });
 
-  describe.only('complexificationity', function() {
+  describe('complexificationity', function() {
     var codebase;
 
     before('should be able to import from a git repo', function() {
@@ -186,7 +186,7 @@ describe('codebase model', function() {
       expect(codebase.importer.datalist.docs['express/lib/middleware/query.js'].fieldDBtype)
         .to.equal('ComputationalLinguisticsDatum');
 
-      var stats = codebase.calculateStats();
+      var stats = codebase.extractStats(codebase.importer.datalist);
 
       expect(codebase.importer.datalist.docs['express/lib/middleware/query.js']
         .stats.tokens.characters.unigrams).to.equal(862);

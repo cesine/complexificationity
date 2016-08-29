@@ -137,29 +137,15 @@ CodeBase.prototype = Object.create(Corpus.prototype, /** @lends CodeBase.prototy
             self.importer.debug('after add files', options);
             self.importer.fileExtensions = options.fileExtensions;
             self.importer.importOptions = options.importOptions;
+
+            self.stats = self.extractStats(self.importer.datalist);
+
             resolve(self);
           }, reject)
           .fail(reject);
       });
 
       return this.whenCloned;
-    }
-  },
-
-  calculateStats: {
-    value: function() {
-      if (!this.importer) {
-        throw new Error('Cannot calculate complexity, import was not run.');
-      }
-
-      if (!this.importer.datalist) {
-        throw new Error('Cannot calculate complexity, import was empty.');
-      }
-
-      this.debug('extractStats from datalist', this.importer.datalist);
-      this.stats = this.extractStats(this.importer.datalist);
-
-      return this.stats;
     }
   },
 
@@ -171,7 +157,7 @@ CodeBase.prototype = Object.create(Corpus.prototype, /** @lends CodeBase.prototy
 
       var self = this;
 
-      var indentation = this.stats.characters.unigrams[' '] /   this.stats.tokens.characters.unigrams;
+      var indentation = this.stats.characters.unigrams[' '] / this.stats.tokens.characters.unigrams;
       this.debug('How indented is the codebase: ' + indentation);
 
       var dot = this.stats.characters.unigrams['.'] / this.stats.tokens.characters.unigrams;
