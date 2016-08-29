@@ -170,9 +170,11 @@ describe('codebase model', function() {
             codebase.importer.fileList.length);
 
           console.log('codebase.importer.datalist.docs', codebase.importer.datalist.docs);
-          expect(codebase.importer.datalist.docs['imported_corpora/expressjs/errorhandler/index.js'].fieldDBtype)
+          expect(codebase.importer.datalist
+              .docs['imported_corpora/expressjs/errorhandler/index.js'].fieldDBtype)
             .to.equal('ComputationalLinguisticsDatum');
-          expect(codebase.importer.datalist.docs['imported_corpora/expressjs/errorhandler/package.json'].fieldDBtype)
+          expect(codebase.importer.datalist
+              .docs['imported_corpora/expressjs/errorhandler/package.json'].fieldDBtype)
             .to.equal('ComputationalLinguisticsDatum');
         });
     });
@@ -185,9 +187,11 @@ describe('codebase model', function() {
       codebase.importer.datalist.add(new CodeBase.DEFAULT_DATUM(fixtures.data[1]));
       codebase.debug('docs', codebase.importer.datalist.docs);
 
-      expect(codebase.importer.datalist.docs['express/lib/middleware/query.js'])
+      expect(codebase.importer.datalist
+          .docs['express/lib/middleware/query.js'])
         .to.be.defined;
-      expect(codebase.importer.datalist.docs['express/lib/middleware/query.js'].fieldDBtype)
+      expect(codebase.importer.datalist
+          .docs['express/lib/middleware/query.js'].fieldDBtype)
         .to.equal('ComputationalLinguisticsDatum');
 
       var stats = codebase.extractStats(codebase.importer.datalist);

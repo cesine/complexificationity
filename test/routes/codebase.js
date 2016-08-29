@@ -43,7 +43,8 @@ describe('codebase routes', function() {
         }
       };
       codebase.validateIdentifier(req, {}, function(err) {
-        expect(err.message).to.equal('Git url https://github.com/expressjs/somethingelse.git doesnt match the slug expressjs/express');
+        expect(err.message).to.equal('Git url https://github.com/expressjs/' +
+          'somethingelse.git doesnt match the slug expressjs/express');
       });
     });
 
