@@ -37,7 +37,7 @@ function validateIdentifier(req, res, next) {
     id: req.params.identifier,
     url: req.query.url
   });
-  debug('added codebase to req ', req.app.locals);
+  debug('added codebase to req ', req.app.locals.codebase);
 
   next();
 }
@@ -83,6 +83,8 @@ function getList(req, res, next) {
  * @param  {Function} next
  */
 function postCodeBase(req, res, next) {
+  debug('POST', req.params);
+
   req.app.locals.codebase
     .save()
     .then(function() {
@@ -103,6 +105,9 @@ function postCodeBase(req, res, next) {
  * @param  {Function} next
  */
 function putCodeBase(req, res, next) {
+  debug('PUT', req.params);
+  // req.app.locals.codebase.debugMode = true;
+
   req.app.locals.codebase
     .fetch()
     .then(function() {
@@ -110,9 +115,9 @@ function putCodeBase(req, res, next) {
     }).then(function() {
       req.app.locals.codebase.calculateCodeMetrics();
       return req.app.locals.codebase.save();
-    }).then(function() {
+    }).then(function(results) {
       res.json(req.app.locals.codebase.toJSON());
-    })
+    }, next)
     .catch(next);
 }
 

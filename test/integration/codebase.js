@@ -154,7 +154,7 @@ describe('/v1/codebases', function() {
         });
     });
 
-    it('should reply not found', function(done) {
+    it.skip('should reply not found', function(done) {
       this.timeout(30 * 1000);
       var x = Date.now();
 
@@ -177,7 +177,6 @@ describe('/v1/codebases', function() {
     });
 
     it('should create', function(done) {
-      this.timeout(30 * 1000);
       supertest(api)
         .post('/v1/codebases/expressjs%2Ferrorhandler')
         .expect('Content-Type', 'application/json; charset=utf-8')
@@ -236,6 +235,7 @@ describe('/v1/codebases', function() {
 
   describe('PUT', function() {
     var codebase;
+    this.timeout(10 * 1000);
 
     before(function(done) {
       supertest(api)
@@ -247,6 +247,8 @@ describe('/v1/codebases', function() {
           }
 
           codebase = new CodeBase(res.body);
+
+          done();
         });
     });
 
@@ -270,9 +272,7 @@ describe('/v1/codebases', function() {
         });
     });
 
-    it.only('should update', function(done) {
-      this.timeout(60 * 1000);
-
+    it('should update', function(done) {
       supertest(api)
         .put('/v1/codebases/expressjs%2Ferrorhandler')
         .expect('Content-Type', 'application/json; charset=utf-8')
@@ -290,9 +290,12 @@ describe('/v1/codebases', function() {
             '_rev',
             'dateCreated',
             'dateModified',
+            'datumFields',
             'complexificationity',
             'team',
-            'stats'
+            'stats',
+            'importer',
+            'whenCloned'
           ]);
 
           expect(res.body._rev).to.not.equal(codebase._rev);

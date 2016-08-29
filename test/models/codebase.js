@@ -124,6 +124,7 @@ describe('codebase model', function() {
 
   describe('complexificationity', function() {
     var codebase;
+    this.timeout(10 * 1000);
 
     before('should be able to import from a git repo', function() {
       codebase = new CodeBase({
@@ -133,7 +134,6 @@ describe('codebase model', function() {
     });
 
     it('should import from git', function() {
-      this.timeout(10 * 1000);
       codebase.debugMode = true;
 
       return codebase.import()

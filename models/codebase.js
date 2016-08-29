@@ -99,7 +99,7 @@ CodeBase.prototype = Object.create(Corpus.prototype, /** @lends CodeBase.prototy
     value: function() {
       var self = this;
 
-      if (!this.importer) {
+      if (!this.importer || !(this.importer instanceof GitImport)) {
         this.importer = new GitImport({
           corpus: this
         });
@@ -128,7 +128,7 @@ CodeBase.prototype = Object.create(Corpus.prototype, /** @lends CodeBase.prototy
           }
         };
         self.importer.session.goal = 'Import from git repo';
-        self.importer.session.datalist.title = 'Files of ' +
+        self.importer.datalist.title = 'Files of ' +
           self.id + ' as of ' + new Date().toUTCString();
 
         // self.importer.debugMode = true;
@@ -239,10 +239,11 @@ CodeBase.prototype = Object.create(Corpus.prototype, /** @lends CodeBase.prototy
       return new Promise(function(resolve, reject) {
         db.get(self.id, function(err, body) {
           if (err) {
-            self.warn('err', err.statusCode, JSON.stringify(err));
+            // self.warn('err', err.statusCode, JSON.stringify(err));
             return reject(err);
           }
 
+          self.debug('fetched', body);
           self.merge('self', body);
           resolve(self);
         });
