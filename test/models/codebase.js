@@ -3,6 +3,10 @@
 var expect = require('chai').expect;
 
 var CodeBase = require('./../../models/codebase').CodeBase;
+var fixtures = {
+  data: require('../fixtures/data.json'),
+  stats: require('../fixtures/stats.json')
+};
 
 describe('codebase model', function() {
   describe('construction', function() {
@@ -119,12 +123,16 @@ describe('codebase model', function() {
   });
 
   describe.only('complexificationity', function() {
-    it('should be able to import from a git repo', function() {
-      this.timeout(10 * 1000);
-      var codebase = new CodeBase({
-        id: 'test/123'
+    var codebase;
+
+    before('should be able to import from a git repo', function() {
+      codebase = new CodeBase({
+        id: 'expressjs/express'
       });
-      expect(codebase.id).to.equal('test/123');
+    });
+
+    it('should import from git', function() {
+      this.timeout(10 * 1000);
 
       return codebase.import()
         .then(function(result) {
@@ -151,14 +159,52 @@ describe('codebase model', function() {
 
           expect(codebase.importer.session.goal).to.equal('Import from git repo');
 
-          console.log('codebase.importer.datalist.length', codebase.importer.datalist.length);
           expect(codebase.importer.datalist.title).to.include('Files of');
           expect(codebase.importer.datalist.title).to.include(codebase.id);
 
-          expect(codebase.importer.datalist.length).to.not.equal(0);
+          expect(codebase.importer.datalist.length).to.equal(2);
           expect(codebase.importer.datalist.length).to.equal(
             codebase.importer.fileList.length);
+
+          expect(codebase.importer.datalist.docs
+            .collection['query.js']).to.be.defined;
+          expect(codebase.importer.datalist.docs
+            .collection['init.js']).to.be.defined;
         });
+    });
+
+    it('should calculate basic stats', function() {
+      codebase.importer.datalist.docs = [];
+      codebase.debug('docs', codebase.importer.datalist.docs);
+
+      codebase.importer.datalist.add(new CodeBase.DEFAULT_DATUM(fixtures.data[0]));
+      codebase.importer.datalist.add(new CodeBase.DEFAULT_DATUM(fixtures.data[1]));
+      codebase.debug('docs', codebase.importer.datalist.docs);
+
+      expect(codebase.importer.datalist.docs['express/lib/middleware/query.js'])
+        .to.be.defined;
+      expect(codebase.importer.datalist.docs['express/lib/middleware/query.js'].fieldDBtype)
+        .to.equal('ComputationalLinguisticsDatum');
+
+      var stats = codebase.calculateStats();
+
+      expect(codebase.importer.datalist.docs['express/lib/middleware/query.js']
+        .stats.tokens.characters.unigrams).to.equal(862);
+      expect(codebase.importer.datalist.docs['express/lib/middleware/init.js']
+        .stats.tokens.words.unigrams).to.equal(94);
+
+      expect(stats).to.deep.equal(fixtures.stats);
+    });
+
+    it('should calculate code metrics', function() {
+      codebase.stats = fixtures.stats;
+      codebase.calculateCodeMetrics();
+
+      expect(codebase.stats.codeMetrics).to.deep.equal({
+        indentation: 0.16253101736972705,
+        dot: 0.014267990074441687,
+        uppercase: 0.0012406947890818859
+      });
     });
   });
 });

@@ -36,6 +36,8 @@ var CodeBase = function CodeBase(options) {
   Corpus.apply(this, [options]);
 };
 
+CodeBase.DEFAULT_DATUM = Corpus.DEFAULT_DATUM;
+
 /**
  * Static members and functions
  */
@@ -113,9 +115,9 @@ CodeBase.prototype = Object.create(Corpus.prototype, /** @lends CodeBase.prototy
           }
         };
         self.importer.session.goal = 'Import from git repo';
-        self.importer.session.datalist.title = 'Files of ' + self.id + ' as of ' + new Date().toUTCString;
+        self.importer.session.datalist.title = 'Files of ' + self.id + ' as of ' + new Date().toUTCString();
 
-        self.importer.debugMode = true;
+        // self.importer.debugMode = true;
         self.importer.clone(options)
           .then(function(result) {
             self.importer.debug('result of clone', result.cloneMessage);
@@ -144,9 +146,52 @@ CodeBase.prototype = Object.create(Corpus.prototype, /** @lends CodeBase.prototy
     }
   },
 
-  calculateComplexificationity: {
+  calculateStats: {
     value: function() {
+      if (!this.importer) {
+        throw new Error('Cannot calculate complexity, import was not run.');
+      }
 
+      if (!this.importer.datalist) {
+        throw new Error('Cannot calculate complexity, import was empty.');
+      }
+
+      this.debug('extractStats from datalist', this.importer.datalist);
+      this.stats = this.extractStats(this.importer.datalist);
+
+      return this.stats;
+    }
+  },
+
+  calculateCodeMetrics: {
+    value: function() {
+      if (!this.stats) {
+        throw new Error('Cannot calculate complexity, stats was not run.');
+      }
+
+      var self = this;
+
+      var indentation = this.stats.characters.unigrams[' '] /   this.stats.tokens.characters.unigrams;
+      this.debug('How indented is the codebase: ' + indentation);
+
+      var dot = this.stats.characters.unigrams['.'] / this.stats.tokens.characters.unigrams;
+      this.debug('How deep are the variables: ' + dot);
+
+      var uppercaseCount = 0;
+      ['A', 'B'].map(function(letter) {
+        if (self.stats.characters.unigrams[letter]) {
+          uppercaseCount = uppercaseCount + self.stats.characters.unigrams[letter];
+        }
+      });
+      var uppercase = uppercaseCount / this.stats.tokens.characters.unigrams;
+      this.debug('How uppercase is the codebase: ' + uppercase);
+
+      this.stats.codeMetrics = {
+        indentation: indentation,
+        dot: dot,
+        uppercase: uppercase
+      };
+      return this.stats;
     }
   },
 
