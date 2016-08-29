@@ -22,8 +22,19 @@ function validateIdentifier(req, res, next) {
     return next(err);
   }
 
+  if (req.query.url && req.query.url.indexOf(req.params.identifier) === -1) {
+    var err = new Error('Git url ' + req.query.url + ' doesnt match the slug ' + req.params.identifier);
+    err.status = 400;
+    return next(err);
+  }
+
+  if (!req.query.url) {
+    req.query.url = 'https://github.com/' + req.params.identifier + '.git';
+  }
+
   req.app.locals.codebase = new CodeBase({
-    id: req.params.identifier
+    id: req.params.identifier,
+    url: req.query.url
   });
   debug('added codebase to req ', req.app.locals);
 
@@ -52,6 +63,11 @@ function getCodeBase(req, res, next) {
  * @param  {Function} next
  */
 function getList(req, res, next) {
+  if (req.query.url) {
+    req.params.identifier = URL.parse(req.query.url).path;
+    return getCodeBase(req, res, next);
+  }
+
   CodeBases.list()
     .then(function(list) {
       res.json(list);
@@ -66,12 +82,14 @@ function getList(req, res, next) {
  * @param  {Function} next
  */
 function postCodeBase(req, res, next) {
-  // TODO calculate complexity
-  req.app.locals.codebase.complexificationity = Math.random();
-
   req.app.locals.codebase
     .save()
     .then(function() {
+      return req.app.locals.codebase.import()
+    }).then(function() {
+      req.app.locals.codebase.calculateCodeMetrics();
+      return req.app.locals.codebase.save();
+    }).then(function() {
       res.json(req.app.locals.codebase.toJSON());
     })
     .catch(next);
@@ -105,9 +123,10 @@ router.get('/:identifier', validateIdentifier, getCodeBase);
 router.post('/:identifier', validateIdentifier, postCodeBase);
 router.put('/:identifier', validateIdentifier, putCodeBase);
 
+module.exports.validateIdentifier = validateIdentifier;
 module.exports.getCodeBase = getCodeBase;
 module.exports.postCodeBase = postCodeBase;
 module.exports.putCodeBase = putCodeBase;
-
 module.exports.getList = getList;
+
 module.exports.router = router;
