@@ -7,7 +7,7 @@ function errors(err, req, res, next) {
   /*jshint +W098 */
   var data;
 
-  debug(err.stack);
+  debug('in the error handler', err, err.stack);
 
   if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
     // expose stack traces
