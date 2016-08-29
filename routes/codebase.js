@@ -15,15 +15,16 @@ var CodeBases = require('./../models/codebases').CodeBases;
  */
 function validateIdentifier(req, res, next) {
   debug('looking up ', req.params.identifier);
+  var err;
 
   if (req.params.identifier.indexOf('/') === -1) {
-    var err = new Error('Invalid GitHub slug should be format owner/repo');
+    err = new Error('Invalid GitHub slug should be format owner/repo');
     err.status = 400;
     return next(err);
   }
 
   if (req.query.url && req.query.url.indexOf(req.params.identifier) === -1) {
-    var err = new Error('Git url ' + req.query.url + ' doesnt match the slug ' + req.params.identifier);
+    err = new Error('Git url ' + req.query.url + ' doesnt match the slug ' + req.params.identifier);
     err.status = 400;
     return next(err);
   }
@@ -85,7 +86,7 @@ function postCodeBase(req, res, next) {
   req.app.locals.codebase
     .save()
     .then(function() {
-      return req.app.locals.codebase.import()
+      return req.app.locals.codebase.import();
     }).then(function() {
       req.app.locals.codebase.calculateCodeMetrics();
       return req.app.locals.codebase.save();
@@ -105,15 +106,12 @@ function putCodeBase(req, res, next) {
   req.app.locals.codebase
     .fetch()
     .then(function() {
-      // TODO re-calculate complexity
-      req.app.locals.codebase.complexificationity = Math.random();
-
-      req.app.locals.codebase
-        .save()
-        .then(function() {
-          res.json(req.app.locals.codebase.toJSON());
-        })
-        .catch(next);
+      return req.app.locals.codebase.import();
+    }).then(function() {
+      req.app.locals.codebase.calculateCodeMetrics();
+      return req.app.locals.codebase.save();
+    }).then(function() {
+      res.json(req.app.locals.codebase.toJSON());
     })
     .catch(next);
 }

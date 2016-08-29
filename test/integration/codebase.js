@@ -85,6 +85,29 @@ describe('/v1/codebases', function() {
         });
     });
 
+    it.skip('should support just a url', function(done) {
+      supertest(api)
+        .get('/v1/codebases?url=https%3A%2F%2Fsomewhere.com%2Ftest%2Fintegration1.git')
+        .expect('Content-Type', 'application/json; charset=utf-8')
+        .expect(200)
+        .end(function(err, res) {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res.body.id).to.equal('test/integration1');
+          expect(res.body).to.include.keys([
+            'fieldDBtype',
+            'id',
+            'version',
+            'api',
+            'team'
+          ]);
+
+          done();
+        });
+    });
+
     it('should verify identifier', function(done) {
       supertest(api)
         .get('/v1/codebases/notagithubslug')
@@ -107,15 +130,13 @@ describe('/v1/codebases', function() {
   });
 
   describe('POST', function() {
-    var codebase;
-
-    after(function() {
-      return new CodeBase(codebase).delete();
-    });
+    var codebase = {
+      id: 'expressjs/errorhandler'
+    };
 
     it('should verify identifier', function(done) {
       supertest(api)
-        .get('/v1/codebases/notagithubslug')
+        .post('/v1/codebases/notagithubslug')
         .expect('Content-Type', 'application/json; charset=utf-8')
         .expect(400)
         .end(function(err, res) {
@@ -133,29 +154,61 @@ describe('/v1/codebases', function() {
         });
     });
 
-    it('should create', function(done) {
+    it('should reply not found', function(done) {
+      this.timeout(30 * 1000);
+      var x = Date.now();
+
       supertest(api)
-        .post('/v1/codebases/test%2Fpost' + Date.now())
+        .post('/v1/codebases/expressjs%2Ferrorhandler' + x)
         .expect('Content-Type', 'application/json; charset=utf-8')
-        .expect(200)
+        .expect(404)
         .end(function(err, res) {
           if (err) {
             return done(err);
           }
 
-          console.log('created ', res.body);
-          expect(res.body).to.include.keys([
-            'fieldDBtype',
-            'id',
-            'version',
-            'api',
-            '_rev',
-            'dateCreated',
-            'dateModified',
-            'complexificationity',
-            'team'
-          ]);
-          codebase = res.body;
+          expect(res.body).to.deep.equal({
+            error: {},
+            message: 'https://github.com/expressjs/errorhandler' + x + '.git not found',
+            status: 404
+          });
+          done();
+        });
+    });
+
+    it('should create', function(done) {
+      this.timeout(30 * 1000);
+      supertest(api)
+        .post('/v1/codebases/expressjs%2Ferrorhandler')
+        .expect('Content-Type', 'application/json; charset=utf-8')
+        .end(function(err, res) {
+          if (err) {
+            return done(err);
+          }
+
+          if (res.body.status) {
+            expect(res.body).to.deep.equal({
+              message: 'Document update conflict.',
+              error: {},
+              status: 409
+            });
+          } else {
+            console.log('created ', res.body);
+            expect(res.body).to.include.keys([
+              'fieldDBtype',
+              'id',
+              'version',
+              'api',
+              '_rev',
+              'dateCreated',
+              'dateModified',
+              'complexificationity',
+              'team',
+              'stats'
+            ]);
+            codebase = res.body;
+          }
+
           done();
         });
     });
@@ -175,6 +228,74 @@ describe('/v1/codebases', function() {
             error: {},
             status: 409
           });
+
+          done();
+        });
+    });
+  });
+
+  describe('PUT', function() {
+    var codebase;
+
+    before(function(done) {
+      supertest(api)
+        .get('/v1/codebases/expressjs%2Ferrorhandler')
+        .expect('Content-Type', 'application/json; charset=utf-8')
+        .end(function(err, res) {
+          if (err) {
+            return done(err);
+          }
+
+          codebase = new CodeBase(res.body);
+        });
+    });
+
+    it('should verify identifier', function(done) {
+      supertest(api)
+        .put('/v1/codebases/notagithubslug')
+        .expect('Content-Type', 'application/json; charset=utf-8')
+        .expect(400)
+        .end(function(err, res) {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res.body).to.deep.equal({
+            message: 'Invalid GitHub slug should be format owner/repo',
+            error: {},
+            status: 400
+          });
+
+          done();
+        });
+    });
+
+    it.only('should update', function(done) {
+      this.timeout(60 * 1000);
+
+      supertest(api)
+        .put('/v1/codebases/expressjs%2Ferrorhandler')
+        .expect('Content-Type', 'application/json; charset=utf-8')
+        .end(function(err, res) {
+          if (err) {
+            return done(err);
+          }
+
+          console.log('updated ', res.body);
+          expect(res.body).to.include.keys([
+            'fieldDBtype',
+            'id',
+            'version',
+            'api',
+            '_rev',
+            'dateCreated',
+            'dateModified',
+            'complexificationity',
+            'team',
+            'stats'
+          ]);
+
+          expect(res.body._rev).to.not.equal(codebase._rev);
 
           done();
         });
