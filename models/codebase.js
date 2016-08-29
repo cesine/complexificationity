@@ -128,7 +128,8 @@ CodeBase.prototype = Object.create(Corpus.prototype, /** @lends CodeBase.prototy
           }
         };
         self.importer.session.goal = 'Import from git repo';
-        self.importer.session.datalist.title = 'Files of ' + self.id + ' as of ' + new Date().toUTCString();
+        self.importer.session.datalist.title = 'Files of ' +
+          self.id + ' as of ' + new Date().toUTCString();
 
         // self.importer.debugMode = true;
         self.importer.clone(options)
@@ -142,7 +143,7 @@ CodeBase.prototype = Object.create(Corpus.prototype, /** @lends CodeBase.prototy
             self.importer.fileList = options.fileList;
             return self.importer.addFileUris(options);
           }, reject)
-          .then(function(result) {
+          .then(function() {
             self.importer.debug('after add files', options);
             self.importer.fileExtensions = options.fileExtensions;
             self.importer.importOptions = options.importOptions;
@@ -254,6 +255,11 @@ CodeBase.prototype = Object.create(Corpus.prototype, /** @lends CodeBase.prototy
       var self = this;
 
       return new Promise(function(resolve, reject) {
+        if (!self.id || !self.rev) {
+          return reject(new Error('Cannot delete a codebase that wasn\'t saved yet: ' +
+            self.id + ' ' + self.rev));
+        }
+
         db.destroy(self.id, self.rev, function(err, body) {
           if (err) {
             self.warn('err', err.statusCode, JSON.stringify(err));
