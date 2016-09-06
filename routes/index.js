@@ -11,4 +11,7 @@ router.get('/healthcheck', function(req, res) {
   });
 });
 
+/* GET UI. */
+router.use('/', express.static(__dirname + '/../public/components/complexificationity-ui'));
+
 module.exports.router = router;
