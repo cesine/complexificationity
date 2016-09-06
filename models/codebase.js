@@ -213,7 +213,7 @@ CodeBase.prototype = Object.create(Corpus.prototype, /** @lends CodeBase.prototy
         self.debug('saving', json);
         db.insert(json, function(err, body) {
           if (err) {
-            self.warn('err', err.statusCode, JSON.stringify(err));
+            self.warn('error saving', err.statusCode, JSON.stringify(err));
             return reject(err);
           }
           if (!body || !body.ok) {
@@ -239,7 +239,7 @@ CodeBase.prototype = Object.create(Corpus.prototype, /** @lends CodeBase.prototy
       return new Promise(function(resolve, reject) {
         db.get(self.id, function(err, body) {
           if (err) {
-            // self.warn('err', err.statusCode, JSON.stringify(err));
+            self.warn('error fetching', err.statusCode, JSON.stringify(err));
             return reject(err);
           }
 
@@ -257,13 +257,16 @@ CodeBase.prototype = Object.create(Corpus.prototype, /** @lends CodeBase.prototy
 
       return new Promise(function(resolve, reject) {
         if (!self.id || !self.rev) {
-          return reject(new Error('Cannot delete a codebase that wasn\'t saved yet: ' +
-            self.id + ' ' + self.rev));
+          var err = new Error('Cannot delete a codebase that wasn\'t saved yet: ' +
+            self.id + ' ' + self.rev);
+          err.statusCode = 404;
+
+          return reject(err);
         }
 
         db.destroy(self.id, self.rev, function(err, body) {
           if (err) {
-            self.warn('err', err.statusCode, JSON.stringify(err));
+            self.warn('error deleteing', err.statusCode, JSON.stringify(err));
             return reject(err);
           }
 
