@@ -29,6 +29,11 @@ function errors(err, req, res, next) {
     data.status = 403;
   }
 
+  if (err.description === 'couch returned 401') {
+    data.status = 500;
+    data.message = 'Cannot contact database';
+  }
+
   res.status(data.status);
   if (typeof res.json === 'function'){
     res.json(data);
