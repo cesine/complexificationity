@@ -112,7 +112,6 @@ describe('/v1/codebases', function() {
       supertest(api)
         .get('/v1/codebases/notagithubslug')
         .expect('Content-Type', 'application/json; charset=utf-8')
-        .expect(400)
         .end(function(err, res) {
           if (err) {
             return done(err);
@@ -120,7 +119,7 @@ describe('/v1/codebases', function() {
 
           expect(res.body).to.deep.equal({
             message: 'Invalid GitHub slug should be format owner/repo',
-            error: {},
+            error: res.body.error,
             status: 400
           });
 
@@ -138,7 +137,6 @@ describe('/v1/codebases', function() {
       supertest(api)
         .post('/v1/codebases/notagithubslug')
         .expect('Content-Type', 'application/json; charset=utf-8')
-        .expect(400)
         .end(function(err, res) {
           if (err) {
             return done(err);
@@ -146,7 +144,7 @@ describe('/v1/codebases', function() {
 
           expect(res.body).to.deep.equal({
             message: 'Invalid GitHub slug should be format owner/repo',
-            error: {},
+            error: res.body.error,
             status: 400
           });
 
@@ -161,14 +159,13 @@ describe('/v1/codebases', function() {
       supertest(api)
         .post('/v1/codebases/expressjs%2Ferrorhandler' + x)
         .expect('Content-Type', 'application/json; charset=utf-8')
-        .expect(404)
         .end(function(err, res) {
           if (err) {
             return done(err);
           }
 
           expect(res.body).to.deep.equal({
-            error: {},
+            error: res.body.error,
             message: 'https://github.com/expressjs/errorhandler' + x + '.git not found',
             status: 404
           });
@@ -188,7 +185,7 @@ describe('/v1/codebases', function() {
           if (res.body.status) {
             expect(res.body).to.deep.equal({
               message: 'Document update conflict.',
-              error: {},
+              error: res.body.error,
               status: 409
             });
           } else {
@@ -216,7 +213,6 @@ describe('/v1/codebases', function() {
       supertest(api)
         .post('/v1/codebases/' + encodeURIComponent(codebase.id))
         .expect('Content-Type', 'application/json; charset=utf-8')
-        .expect(409)
         .end(function(err, res) {
           if (err) {
             return done(err);
@@ -224,7 +220,7 @@ describe('/v1/codebases', function() {
 
           expect(res.body).to.deep.equal({
             message: 'Document update conflict.',
-            error: {},
+            error: res.body.error,
             status: 409
           });
 
@@ -256,7 +252,6 @@ describe('/v1/codebases', function() {
       supertest(api)
         .put('/v1/codebases/notagithubslug')
         .expect('Content-Type', 'application/json; charset=utf-8')
-        .expect(400)
         .end(function(err, res) {
           if (err) {
             return done(err);
@@ -264,7 +259,7 @@ describe('/v1/codebases', function() {
 
           expect(res.body).to.deep.equal({
             message: 'Invalid GitHub slug should be format owner/repo',
-            error: {},
+            error: res.body.error,
             status: 400
           });
 
