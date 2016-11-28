@@ -12,6 +12,6 @@ router.get('/healthcheck', function(req, res) {
 });
 
 /* GET UI. */
-router.use('/', express.static(__dirname + '/../public/components/complexificationity-ui'));
+router.use('/', express.static(__dirname + '/../public/components/complexificationity-ui/build'));
 
 module.exports.router = router;
