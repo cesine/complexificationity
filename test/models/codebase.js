@@ -128,6 +128,7 @@ describe('codebase model', function() {
 
     before('should be able to import from a git repo', function() {
       codebase = new CodeBase({
+        // debugMode: true,
         id: 'expressjs/errorhandler',
         url: 'https://github.com/expressjs/errorhandler.git'
       });
@@ -171,10 +172,10 @@ describe('codebase model', function() {
 
           console.log('codebase.importer.datalist.docs', codebase.importer.datalist.docs);
           expect(codebase.importer.datalist
-              .docs['imported_corpora/expressjs/errorhandler/index.js'].fieldDBtype)
+              .docs['index'].fieldDBtype)
             .to.equal('ComputationalLinguisticsDatum');
           expect(codebase.importer.datalist
-              .docs['imported_corpora/expressjs/errorhandler/package.json'].fieldDBtype)
+              .docs['package'].fieldDBtype)
             .to.equal('ComputationalLinguisticsDatum');
         });
     });
