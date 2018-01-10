@@ -8,5 +8,6 @@
     "components"
   ],
   "dependencies": {
+    "complexificationity-ui": "git+https://github.com/cesine/complexificationity-ui.git"
   }
 }
